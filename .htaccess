@@ -1,0 +1,21 @@
+<IfModule mod_php5.c>
+#php_flag        display_errors  On
+#php_flag        log_errors      On
+#php_value       error_log       /var/www/esco-apps-redirector/logs/errors
+php_value session.cookie_path "/esco-apps-redirector"
+#php_value       error_reporting "E_ERROR | E_WARNING | E_PARSE | E_NOTICE"
+</IfModule>
+# DISABLE CACHING
+<IfModule mod_expires.c>
+	ExpiresActive Off
+</IfModule>
+<IfModule mod_headers.c>
+	FileETag None
+	Header unset ETag
+	Header unset Pragma
+	Header unset Cache-Control
+	Header unset Last-Modified
+	Header set Pragma "no-cache"
+	Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+	Header set Expires "Mon, 10 Apr 1972 00:00:00 GMT"
+</IfModule>
