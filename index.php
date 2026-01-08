@@ -16,6 +16,7 @@ ini_set('session.cookie_lifetime', 15 * 60); // en secondes
 ini_set('session.cookie_path',  dirname($_SERVER['PHP_SELF']));
 ini_set('session.cookie_domain', "");
 ini_set('session.cookie_secure', true);
+ini_set('session.cookie_samesite', 'None');
 ini_set('session.cookie_httponly', true); // PHP 5.2.0. minimum
 ini_set('session.use_trans_sid', false);
 
@@ -201,6 +202,7 @@ if ($session_mode == 'BROADCAST' && is_array($rebroadcast_nodes)) {
     phpCAS::addRebroadcastNode($value);
   }
 }
+
 // to handle the global logout
 //phpCAS::handleLogoutRequests(false);
 phpCAS::handleLogoutRequests(true, $cas_real_hosts);
@@ -252,23 +254,17 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
   $appli = $_GET['appli'];
   if (is_array($mapping) && array_key_exists($appli, $mapping)){
     log_action("TRACE", "L'application demandée fait bien partie de la liste des applications configurées.");
-    if (!array_key_exists('USER_ATTRIBUTE',$mapping[$appli]) || !array_key_exists('LINK',$mapping[$appli])) {
-      log_action("ERROR", "Les propriétés USER_ATTRIBUTE et LINK dans la property \$mapping['".$appli."'] doivent être renseignées !");
-      echo $msg_access_problem;
-      exit();
-    }
-    $user_attr = $mapping[$appli]['USER_ATTRIBUTE'];
-    $user_attr_fallback = array_key_exists('USER_ATTRIBUTE_FALLBACK', $mapping[$appli]) ? $mapping[$appli]['USER_ATTRIBUTE_FALLBACK'] : null;
-    log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour le mapping avec le lien est : ".$user_attr);
-    log_action("DEBUG", "Le tableau des liens associés aux propriétés définies pour l'application est : ".print_r($mapping[$appli], true));
-    log_action("DEBUG", "Le nom de l'attribut CAS de fallback utilisé pour le mapping avec le lien est : ".$user_attr_fallback);
-    if (is_array($CAS_attrs)){
+    if (array_key_exists('DOMAIN',$mapping[$appli]) && array_key_exists('DOMAIN_MAP',$mapping[$appli])) {
+      log_action("DEBUG", "Cas de configuration sur le mapping de domaine");
+      log_action("DEBUG", "Le tableau des liens associés aux domaines courants définis pour l'application est : ".print_r($mapping[$appli], true));
       try {
-        $redirect_rslt = find_cas_attr($user_attr, $appli);
-        // fallback sur l'attribut de fallback si défini
-        if (is_null($redirect_rslt) && ! is_null($user_attr_fallback)) {
-          log_action("DEBUG", "L'attribut utilisateur de fallback sera utilisé pour le mapping car l'attribut de base n'est pas fourni.");
-          $redirect_rslt = find_cas_attr($user_attr_fallback, $appli);
+        $current_domain = $mapping[$appli]['DOMAIN'];
+        $redirect_rslt = $mapping[$appli]['DOMAIN_MAP'][$current_domain];
+        $default_redirect = $mapping[$appli]['DEFAULT_LINK'];
+        log_action("DEBUG", "Recherche de l'URL de redirection pour le domaine courant '". $current_domain ."'");
+        if (is_null($redirect_rslt) && ! is_null($default_redirect)) {
+          log_action("DEBUG", "Mapping de domaine sur domaine non configuré, appliquer redirection sur l'URL par défaut défini");
+          $redirect_rslt = $default_redirect;
         }
         // si url de redirect OK
         if (! is_null($redirect_rslt)) do_redirect($mapping[$appli], $redirect_rslt);
@@ -276,11 +272,40 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
         log_action("DEBUG", "Aucune url de redirection n'a été trouvée.");
         echo $msg_access_problem;
       } catch (Exception $e) {
+          echo $msg_access_problem;
+      }
+    } else if (array_key_exists('USER_ATTRIBUTE',$mapping[$appli]) && array_key_exists('LINK',$mapping[$appli])) {
+      log_action("DEBUG", "Cas de configuration sur le mapping attribut utilisateur");
+      $user_attr = $mapping[$appli]['USER_ATTRIBUTE'];
+      $user_attr_fallback = array_key_exists('USER_ATTRIBUTE_FALLBACK', $mapping[$appli]) ? $mapping[$appli]['USER_ATTRIBUTE_FALLBACK'] : null;
+      log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour le mapping avec le lien est : ".$user_attr);
+      log_action("DEBUG", "Le tableau des liens associés aux propriétés définies pour l'application est : ".print_r($mapping[$appli], true));
+      log_action("DEBUG", "Le nom de l'attribut CAS de fallback utilisé pour le mapping avec le lien est : ".$user_attr_fallback);
+      if (is_array($CAS_attrs)){
+        try {
+          $redirect_rslt = find_cas_attr($user_attr, $appli);
+          // fallback sur l'attribut de fallback si défini
+          if (is_null($redirect_rslt) && ! is_null($user_attr_fallback)) {
+            log_action("DEBUG", "L'attribut utilisateur de fallback sera utilisé pour le mapping car l'attribut de base n'est pas fourni.");
+            $redirect_rslt = find_cas_attr($user_attr_fallback, $appli);
+          }
+          // si url de redirect OK
+          if (! is_null($redirect_rslt)) do_redirect($mapping[$appli], $redirect_rslt);
+          // sinon message d'erreur
+          log_action("DEBUG", "Aucune url de redirection n'a été trouvée.");
+          echo $msg_access_problem;
+        } catch (Exception $e) {
+          echo $msg_access_problem;
+        }
+      } else {
+        log_action("ERROR", "Le serveur CAS n'a pas retourné d'attribut utilisateur souhaité pour l'application " . $appli . ". La liste des attributs fournis par le serveur CAS sont : " . print_r($CAS_attrs, true));
         echo $msg_access_problem;
       }
     } else {
-      log_action("ERROR", "Le serveur CAS n'a pas retourné d'attribut utilisateur souhaité pour l'application " . $appli . ". La liste des attributs fournis par le serveur CAS sont : " . print_r($CAS_attrs, true));
+      log_action("DEBUG", "Erreur de configuration sur un attribut de mapping");
+      log_action("ERROR", "Les propriétés USER_ATTRIBUTE + LINK ou DOMAIN + DOMAIN_MAP dans la property \$mapping['".$appli."'] doivent être renseignées !");
       echo $msg_access_problem;
+      exit();
     }
   } else {
     log_action("ERROR","L'application demandée n'est pas définie dans la configuration, vérifiez la configuration (dans le fichier conf.inc.php).");
