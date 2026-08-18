@@ -83,3 +83,11 @@ The real configuration files are private and ignored by Git:
 - `conf/cas-test.inc.php`
 
 Do not commit real local values from these files.
+
+Before modifying any private configuration file, create a backup copy next to the original file. The backup filename must include the current date and time up to the minute using the `YYYYMMDDHHMM` format, without spaces.
+
+Example:
+
+```text
+conf/conf.inc.php.bkp.202608181430
+```
