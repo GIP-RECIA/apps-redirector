@@ -18,6 +18,7 @@ There is no `index.html`. The main entry points are:
 - `index.php`: production CAS redirect flow.
 - `index_test.php`: test/dev CAS redirect flow.
 - `commonFunction.php`: shared logging and authorized IP/subnet helper.
+- `docs/CONFIGURATION.md`: configuration variables and mapping examples.
 - `conf/conf.inc.example.php`: example app mapping and global settings.
 - `conf/conf.inc.test.example.php`: example test/dev app configuration overlay.
 - `conf/cas.inc.example.php`: example CAS server/session configuration.
