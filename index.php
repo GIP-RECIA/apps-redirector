@@ -115,6 +115,7 @@ function do_redirect($conf_property,$url) {
     echo $msg_access_problem;
     exit();
   }
+  $url = do_replacement($conf_property, $url);
   log_action("INFO", "Le lien vers lequel rediriger l'utilisateur est : ".$url);
   if (!can_access($conf_property)){
     log_action("ERROR", "L'utilisater " . phpCAS::getUser() . " n'a pas les droits pour accéder à l'application " . $appli . "  !");
