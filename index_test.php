@@ -110,6 +110,11 @@ function do_replacement($conf_property,$chaine){
 
 function do_redirect($conf_property,$url) {
   global $appli, $DEV_MOD, $msg_access_problem;
+  if (is_null($url) || trim($url) === '' || strtolower(trim($url)) === 'null') {
+    log_action("INFO", "Aucune redirection n'est définie pour l'application " . $appli . "  !");
+    echo $msg_access_problem;
+    exit();
+  }
   log_action("INFO", "Le lien vers lequel rediriger l'utilisateur est : ".$url);
   if (!can_access($conf_property)){
     log_action("ERROR", "L'utilisater " . phpCAS::getUser() . " n'a pas les droits pour accéder à l'application " . $appli . "  !");
