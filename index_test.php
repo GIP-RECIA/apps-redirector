@@ -35,9 +35,9 @@ function can_access($conf_property){
     $regex=$conf_property['FILTER']['REGEX'];
     log_action("TRACE", "Un filtre sur l'accès est défini et les proriétées USER_ATTRIBUTE et REGEX sont définies.");
     log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour le filtre avec le lien est : ".$filter_attr);
-    log_action("DEBUG", "Le tableau des propriétés du filtre est : ".print_r($conf_property['FILTER'], true));
+    log_action("TRACE", "Le tableau des propriétés du filtre est : ".print_r($conf_property['FILTER'], true));
     if (array_key_exists($filter_attr, $CAS_attrs)){
-      log_action("DEBUG", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$filter_attr], true));
+      log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$filter_attr], true));
       log_action("TRACE", "L'attribut utilisateur nécessaire au filtre est fourni par le serveur CAS.");
       if (!is_array($CAS_attrs[$filter_attr])){
         if (preg_match($regex, $CAS_attrs[$filter_attr])){
@@ -50,10 +50,10 @@ function can_access($conf_property){
       $found=false;
       $i=0;
       log_action("TRACE", "Nous sommes dans le cas d'un tableau de valeurs retournées pas le CAS");
-      log_action("DEBUG", "Liste des valeurs CAS à tester : ".print_r($CAS_attrs[$filter_attr], true));
+      log_action("TRACE", "Liste des valeurs CAS à tester : ".print_r($CAS_attrs[$filter_attr], true));
       while (!$found and $i < sizeof($CAS_attrs[$filter_attr])){
         $current_CAS_attr=$CAS_attrs[$filter_attr][$i];
-        log_action("DEBUG", "Teste l'appartenance de ".$current_CAS_attr);
+        log_action("TRACE", "Teste l'appartenance de ".$current_CAS_attr);
         if (preg_match($regex, $current_CAS_attr)) {
           $found = true;
           log_action("DEBUG", "Le teste est positif");
@@ -67,7 +67,8 @@ function can_access($conf_property){
       }
       return $found;
     }
-    log_action("ERROR", "Le serveur CAS n'a pas retourné l'attribut " . $filter_attr . " souhaité pour le filtre. La liste des attributs fournis par le serveur CAS sont : " . print_r($CAS_attrs, true));
+    log_action("ERROR", "Le serveur CAS n'a pas retourné l'attribut " . $filter_attr . " souhaité pour le filtre. Les attributs fournis par le serveur CAS sont : " . implode(', ', array_keys($CAS_attrs)));
+    log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
     echo $msg_access_problem;
     exit();
   }
@@ -95,11 +96,13 @@ function do_replacement($conf_property,$chaine){
         return $modif_chaine;
       }
       $i=0;
-      log_action("ERROR", "Remplacement d'une chaîne par rapport à un attribut CAS contenant plusieurs valeurs ! Liste des valeurs CAS retournées : ".print_r($CAS_attrs[$replacement_attr], true));
+      log_action("ERROR", "Remplacement d'une chaîne par rapport à un attribut CAS contenant plusieurs valeurs pour l'attribut " . $replacement_attr . " !");
+      log_action("TRACE", "Liste des valeurs CAS retournées : ".print_r($CAS_attrs[$replacement_attr], true));
       echo $msg_access_problem;
       exit();
     }
-    log_action("ERROR", "Le serveur CAS n'a pas retourné l'attribut " . $replacement_attr . " souhaité pour le filtre. La liste des attributs fournis par le serveur CAS sont : " . print_r($CAS_attrs, true));
+    log_action("ERROR", "Le serveur CAS n'a pas retourné l'attribut " . $replacement_attr . " souhaité pour le remplacement. Les attributs fournis par le serveur CAS sont : " . implode(', ', array_keys($CAS_attrs)));
+    log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
     echo $msg_access_problem;
     exit();
   }
@@ -140,7 +143,7 @@ function do_redirect($conf_property,$url) {
 function find_cas_attr($user_attr, $appli) {
   global $CAS_attrs, $mapping;
   if (array_key_exists($user_attr, $CAS_attrs)) {
-    log_action("DEBUG", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$user_attr], true));
+    log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$user_attr], true));
     log_action("TRACE", "L'attribut utilisateur nécessaire à la selection du lien est bien fourni par le serveur CAS.");
     if (! is_array($CAS_attrs[$user_attr]) and array_key_exists($CAS_attrs[$user_attr],$mapping[$appli]['LINK'])){
       $cas_attr=$CAS_attrs[$user_attr];
@@ -152,9 +155,9 @@ function find_cas_attr($user_attr, $appli) {
       $found=false;
       $i=0;
       log_action("TRACE", "Nous sommes dans le cas d'un tableau de valeurs retournée pas le CAS");
-      log_action("DEBUG", "Liste des propriétés définies à tester : ".print_r($possible_val_user_attr, true));
+      log_action("DEBUG", "Liste des propriétés définies à tester : ".implode(', ', $possible_val_user_attr));
       while (!$found and $i < sizeof($possible_val_user_attr)){
-        log_action("DEBUG", "Teste l'appartenance de ".$possible_val_user_attr[$i]);
+        log_action("TRACE", "Teste l'appartenance de ".$possible_val_user_attr[$i]);
         if (in_array($possible_val_user_attr[$i], $CAS_attrs[$user_attr])) {
           $found = true;
           $cas_attr=$possible_val_user_attr[$i];
@@ -165,7 +168,8 @@ function find_cas_attr($user_attr, $appli) {
         $i++;
       }
       if (! $found){
-        log_action("ERROR", "Les valeurs des propriétées définies pour l'application " . $appli . " n'ont pas été trouvées parmis celles fournies par le serveur CAS pour l'utilisateur " . phpCAS::getUser() ." !");
+        log_action("ERROR", "Les valeurs des propriétées définies pour l'application " . $appli . " n'ont pas été trouvées parmis celles fournies par le serveur CAS pour l'attribut " . $user_attr . " de l'utilisateur " . phpCAS::getUser() ." !");
+        log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$user_attr], true));
         return;
       } else {
         return $mapping[$appli]['LINK'][$cas_attr];
@@ -177,11 +181,13 @@ function find_cas_attr($user_attr, $appli) {
       return $LINK;
       // cas du !array_key_exists($CAS_attrs[$user_attr],$mapping[$appli]['LINK']) and !is_array($CAS_attrs[$user_attr])
     } else {
-      log_action("ERROR", "Aucune propriétée n'a été définie pour l'application " . $appli . ", l'attribut CAS choisi " . $user_attr . " et la valeur " . $CAS_attrs[$user_attr] . ", vérifiez la configuration (par exemple l'association profil/url dans le fichier conf.inc.php).");
+      log_action("ERROR", "Aucune propriétée n'a été définie pour l'application " . $appli . " et l'attribut CAS choisi " . $user_attr . ", vérifiez la configuration (par exemple l'association profil/url dans le fichier conf.inc.php).");
+      log_action("TRACE", "La valeur CAS non configurée pour l'attribut " . $user_attr . " est : " . $CAS_attrs[$user_attr]);
       throw new Exception("Configuration error !");
     }
   } else {
-    log_action("ERROR", "Le serveur CAS n'a pas retourné l'attribut " . $user_attr . " souhaité pour l'application " . $appli . ". La liste des attributs fournis par le serveur CAS sont : " . print_r($CAS_attrs, true));
+    log_action("ERROR", "Le serveur CAS n'a pas retourné l'attribut " . $user_attr . " souhaité pour l'application " . $appli . ". Les attributs fournis par le serveur CAS sont : " . implode(', ', array_keys($CAS_attrs)));
+    log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
     return;
   }
 }
@@ -236,12 +242,14 @@ if ($DEV_MOD){
   <body>
   <?php
 }
-log_action("DEBUG","SessionID (si aucun global logout non fonctionnel) : ".session_id()." et request value : ".print_r($_REQUEST, true));
+log_action("DEBUG","SessionID (si aucun global logout non fonctionnel) : ".session_id()." et request keys : ".implode(', ', array_keys($_REQUEST)));
+log_action("TRACE","Request values : ".print_r($_REQUEST, true));
 log_action("DEBUG","Successfull Authentication!");
 log_action("DEBUG","Connexion au serveur cas avec les paramètres suivants : ".$protocol.",".$host.":".$port."/".$uri);
 log_action("INFO","L'utilisateur est correctement authentifié et son uid est : " . phpCAS::getUser());
 log_action("DEBUG","La version du client phpCAS est : " . phpCAS::getVersion());
-log_action("DEBUG","Le tableau des attributs CAS fournis est : ".print_r($CAS_attrs, true));
+log_action("DEBUG","Les attributs CAS fournis sont : ".implode(', ', array_keys($CAS_attrs)));
+log_action("TRACE","Le tableau des attributs CAS fournis est : ".print_r($CAS_attrs, true));
 if ($DEV_MOD){
   ?>
   <h1>Successfull Authentication!</h1>
@@ -261,7 +269,8 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
     log_action("TRACE", "L'application demandée fait bien partie de la liste des applications configurées.");
     if (array_key_exists('DOMAIN',$mapping[$appli]) && array_key_exists('DOMAIN_MAP',$mapping[$appli])) {
       log_action("DEBUG", "Cas de configuration sur le mapping de domaine");
-      log_action("DEBUG", "Le tableau des liens associés aux domaines courants définis pour l'application est : ".print_r($mapping[$appli], true));
+      log_action("DEBUG", "Les clés de configuration définies pour l'application sont : ".implode(', ', array_keys($mapping[$appli])));
+      log_action("TRACE", "Le tableau des liens associés aux domaines courants définis pour l'application est : ".print_r($mapping[$appli], true));
       try {
         $current_domain = $mapping[$appli]['DOMAIN'];
         $redirect_rslt = array_key_exists($current_domain, $mapping[$appli]['DOMAIN_MAP']) ? $mapping[$appli]['DOMAIN_MAP'][$current_domain] : null;
@@ -289,7 +298,8 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
       $user_attr = $mapping[$appli]['USER_ATTRIBUTE'];
       $user_attr_fallback = array_key_exists('USER_ATTRIBUTE_FALLBACK', $mapping[$appli]) ? $mapping[$appli]['USER_ATTRIBUTE_FALLBACK'] : null;
       log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour le mapping avec le lien est : ".$user_attr);
-      log_action("DEBUG", "Le tableau des liens associés aux propriétés définies pour l'application est : ".print_r($mapping[$appli], true));
+      log_action("DEBUG", "Les clés de configuration définies pour l'application sont : ".implode(', ', array_keys($mapping[$appli])));
+      log_action("TRACE", "Le tableau des liens associés aux propriétés définies pour l'application est : ".print_r($mapping[$appli], true));
       log_action("DEBUG", "Le nom de l'attribut CAS de fallback utilisé pour le mapping avec le lien est : ".$user_attr_fallback);
       if (is_array($CAS_attrs)){
         try {
@@ -308,7 +318,8 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
           echo $msg_access_problem;
         }
       } else {
-        log_action("ERROR", "Le serveur CAS n'a pas retourné d'attribut utilisateur souhaité pour l'application " . $appli . ". La liste des attributs fournis par le serveur CAS sont : " . print_r($CAS_attrs, true));
+        log_action("ERROR", "Le serveur CAS n'a pas retourné d'attribut utilisateur souhaité pour l'application " . $appli . ".");
+        log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
         echo $msg_access_problem;
       }
     } else {
