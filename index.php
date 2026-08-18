@@ -142,6 +142,14 @@ function find_context($conf_property) {
   if (!isset($context) || !is_array($context)) {
     return;
   }
+  $current_context = null;
+  if (array_key_exists('DOMAIN_MAP', $context) && is_array($context['DOMAIN_MAP'])) {
+    $current_domain = array_key_exists('DOMAIN', $context) ? $context['DOMAIN'] : $_SERVER['SERVER_NAME'];
+    log_action("DEBUG", "Recherche du contexte avec le domaine courant '" . $current_domain . "'.");
+    if (array_key_exists($current_domain, $context['DOMAIN_MAP'])) {
+      $current_context = $context['DOMAIN_MAP'][$current_domain];
+    }
+  }
   if (array_key_exists('LINK', $context) && is_array($context['LINK'])) {
     $context_attrs = array();
     if (array_key_exists('USER_ATTRIBUTE', $context)) {
@@ -172,13 +180,7 @@ function find_context($conf_property) {
       $j++;
     }
   }
-  if (array_key_exists('DOMAIN_MAP', $context) && is_array($context['DOMAIN_MAP'])) {
-    $current_domain = array_key_exists('DOMAIN', $context) ? $context['DOMAIN'] : $_SERVER['SERVER_NAME'];
-    log_action("DEBUG", "Recherche du contexte avec le domaine courant '" . $current_domain . "'.");
-    if (array_key_exists($current_domain, $context['DOMAIN_MAP'])) {
-      return $context['DOMAIN_MAP'][$current_domain];
-    }
-  }
+  return $current_context;
 }
 
 function find_default_link($conf_property) {
