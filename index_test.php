@@ -120,8 +120,7 @@ function do_redirect($conf_property,$url) {
   if (!$DEV_MOD) {
     header('Content-Type: text/html; charset=utf-8;');
     header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
-    header("HTTP/1.1 301 Moved Permanently");
-    header("Location: ".$url);
+    header("Location: ".$url, true, 302);
     exit();
   } else {
     echo 'header("Location: "'.$url.')';
