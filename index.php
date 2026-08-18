@@ -137,6 +137,55 @@ function do_redirect($conf_property,$url) {
   }
 }
 
+function find_context($conf_property) {
+  global $CAS_attrs, $context;
+  if (!isset($context) || !is_array($context)) {
+    return;
+  }
+  if (array_key_exists('USER_ATTRIBUTE', $context) && array_key_exists('LINK', $context) && is_array($context['LINK'])) {
+    $context_attr = $context['USER_ATTRIBUTE'];
+    if (array_key_exists($context_attr, $CAS_attrs)) {
+      log_action("DEBUG", "Recherche du contexte avec l'attribut CAS " . $context_attr . ".");
+      log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS de contexte est : " . print_r($CAS_attrs[$context_attr], true));
+      if (!is_array($CAS_attrs[$context_attr]) && array_key_exists($CAS_attrs[$context_attr], $context['LINK'])) {
+        return $context['LINK'][$CAS_attrs[$context_attr]];
+      } else if (is_array($CAS_attrs[$context_attr])) {
+        $possible_context_values = array_keys($context['LINK']);
+        $i = 0;
+        while ($i < sizeof($possible_context_values)) {
+          if (in_array($possible_context_values[$i], $CAS_attrs[$context_attr])) {
+            return $context['LINK'][$possible_context_values[$i]];
+          }
+          $i++;
+        }
+      }
+    }
+  }
+  if (array_key_exists('DOMAIN_MAP', $context) && is_array($context['DOMAIN_MAP'])) {
+    $current_domain = array_key_exists('DOMAIN', $context) ? $context['DOMAIN'] : $_SERVER['SERVER_NAME'];
+    log_action("DEBUG", "Recherche du contexte avec le domaine courant '" . $current_domain . "'.");
+    if (array_key_exists($current_domain, $context['DOMAIN_MAP'])) {
+      return $context['DOMAIN_MAP'][$current_domain];
+    }
+  }
+}
+
+function find_default_link($conf_property) {
+  global $appli;
+  $current_context = find_context($conf_property);
+  if (!is_null($current_context) && array_key_exists('CONTEXT_DEFAULT_LINK', $conf_property) && array_key_exists($current_context, $conf_property['CONTEXT_DEFAULT_LINK'])) {
+    log_action("DEBUG", "Utilisation du lien par défaut du contexte " . $current_context . " pour l'application " . $appli . ".");
+    return $conf_property['CONTEXT_DEFAULT_LINK'][$current_context];
+  }
+  if (!is_null($current_context)) {
+    log_action("DEBUG", "Aucun lien par défaut n'est défini pour le contexte " . $current_context . " et l'application " . $appli . ".");
+  }
+  if (array_key_exists('DEFAULT_LINK', $conf_property)) {
+    log_action("TRACE", "Nous sommes dans le cas de l'utilisation du lien par défaut.");
+    return $conf_property['DEFAULT_LINK'];
+  }
+}
+
 /**
 * Retourn l'url de redirection si OK, null si attribut utilisateur non existant et throw exception si pas de droits d'accès
 */
@@ -174,11 +223,9 @@ function find_cas_attr($user_attr, $appli) {
       } else {
         return $mapping[$appli]['LINK'][$cas_attr];
       }
-    } else if (array_key_exists('DEFAULT_LINK',$mapping[$appli])) {
+    } else if (!is_null($default_link = find_default_link($mapping[$appli]))) {
       // Cas où rien n'a été trouvé en fonction de l'attribut utilisateur, dans ce cas on prend la valeur par défaut si celle-ci est définie.
-      log_action("TRACE", "Nous sommes dans le cas de l'utilisation du lien par défaut.");
-      $LINK = do_replacement($mapping[$appli], $mapping[$appli]['DEFAULT_LINK']);
-      return $LINK;
+      return $default_link;
       // cas du !array_key_exists($CAS_attrs[$user_attr],$mapping[$appli]['LINK']) and !is_array($CAS_attrs[$user_attr])
     } else {
       log_action("ERROR", "Aucune propriétée n'a été définie pour l'application " . $appli . " et l'attribut CAS choisi " . $user_attr . ", vérifiez la configuration (par exemple l'association profil/url dans le fichier conf.inc.php).");
@@ -308,6 +355,9 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
           if (is_null($redirect_rslt) && ! is_null($user_attr_fallback)) {
             log_action("DEBUG", "L'attribut utilisateur de fallback sera utilisé pour le mapping car l'attribut de base n'est pas fourni.");
             $redirect_rslt = find_cas_attr($user_attr_fallback, $appli);
+          }
+          if (is_null($redirect_rslt)) {
+            $redirect_rslt = find_default_link($mapping[$appli]);
           }
           // si url de redirect OK
           if (! is_null($redirect_rslt)) do_redirect($mapping[$appli], $redirect_rslt);

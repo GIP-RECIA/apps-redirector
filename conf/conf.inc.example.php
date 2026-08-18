@@ -23,6 +23,8 @@ print_r($DEV_MOD, true);
 
 /** tableau de mapping des noms, type, etc sous la forme $etab['UAI']['LABEL|TYPE|SITE']='value' **/
 static $mapping = array();
+/** tableau optionnel des contextes, par domaine ou par attribut CAS **/
+static $context = array();
 /** For json informaitons */
 static $etab = array();
 
@@ -39,6 +41,8 @@ $mapping['APPS_NAME']['LINK']['PROFIL_WITHOUT_REDIRECT']='null';
 $mapping['APPS_NAME']['LINK']['PROFIL_WITH_PLACEHOLDER']='https://%ESCOUAICourant%.example.org';
 $mapping['APPS_NAME']['REPLACE']['USER_ATTRIBUTE']='ESCOUAICourant';
 $mapping['APPS_NAME']['REPLACE']['VALUE_TO_LOWERCASE']=true;
+//définition facultative d'un lien par défaut spécifique à un contexte résolu par domaine ou attribut CAS.
+$mapping['APPS_NAME']['CONTEXT_DEFAULT_LINK']['CONTEXT_A']='http://A_CONTEXT_DEFAULT_URL';
 //définition facultative d'un filtre sur un autre attribut fourni dans le ticket CAS afin d'empêcher certains utilisateurs d'accéder à l'application.
 $mapping['APPS_NAME']['FILTER']['USER_ATTRIBUTE']='ENTPersonJointure';
 // regex à appliquer sur la ou les valeurs de l'attribut fourni par le CAS afin de déterminer si l'utilisateur à le droit d'accès.
@@ -48,6 +52,10 @@ $mapping['APPS_NAME_BY_DOMAIN']['DOMAIN']=$_SERVER['SERVER_NAME'];
 $mapping['APPS_NAME_BY_DOMAIN']['DEFAULT_LINK']='http://A_DEFAULT_URL';
 $mapping['APPS_NAME_BY_DOMAIN']['DOMAIN_MAP']=array();
 $mapping['APPS_NAME_BY_DOMAIN']['DOMAIN_MAP']['domain.example.org']='http://AN_URL';
+//définition facultative des contextes globaux, utilisés par CONTEXT_DEFAULT_LINK.
+$context['DOMAIN_MAP']['domain.example.org']='CONTEXT_A';
+$context['USER_ATTRIBUTE']='ESCOUAICourant';
+$context['LINK']['UAI_WITH_SPECIFIC_CONTEXT']='CONTEXT_B';
 */
 
 /*
