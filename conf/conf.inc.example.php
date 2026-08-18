@@ -55,7 +55,9 @@ $mapping['APPS_NAME_BY_DOMAIN']['DOMAIN_MAP']['domain.example.org']='http://AN_U
 //définition facultative des contextes globaux, utilisés par CONTEXT_DEFAULT_LINK.
 $context['DOMAIN_MAP']['domain.example.org']='CONTEXT_A';
 $context['USER_ATTRIBUTE']='ESCOUAICourant';
+$context['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
 $context['LINK']['UAI_WITH_SPECIFIC_CONTEXT']='CONTEXT_B';
+$context['LINK']['SIREN_WITH_SPECIFIC_CONTEXT']='COLL';
 */
 
 /*

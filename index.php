@@ -142,23 +142,34 @@ function find_context($conf_property) {
   if (!isset($context) || !is_array($context)) {
     return;
   }
-  if (array_key_exists('USER_ATTRIBUTE', $context) && array_key_exists('LINK', $context) && is_array($context['LINK'])) {
-    $context_attr = $context['USER_ATTRIBUTE'];
-    if (array_key_exists($context_attr, $CAS_attrs)) {
-      log_action("DEBUG", "Recherche du contexte avec l'attribut CAS " . $context_attr . ".");
-      log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS de contexte est : " . print_r($CAS_attrs[$context_attr], true));
-      if (!is_array($CAS_attrs[$context_attr]) && array_key_exists($CAS_attrs[$context_attr], $context['LINK'])) {
-        return $context['LINK'][$CAS_attrs[$context_attr]];
-      } else if (is_array($CAS_attrs[$context_attr])) {
-        $possible_context_values = array_keys($context['LINK']);
-        $i = 0;
-        while ($i < sizeof($possible_context_values)) {
-          if (in_array($possible_context_values[$i], $CAS_attrs[$context_attr])) {
-            return $context['LINK'][$possible_context_values[$i]];
+  if (array_key_exists('LINK', $context) && is_array($context['LINK'])) {
+    $context_attrs = array();
+    if (array_key_exists('USER_ATTRIBUTE', $context)) {
+      $context_attrs[] = $context['USER_ATTRIBUTE'];
+    }
+    if (array_key_exists('USER_ATTRIBUTE_FALLBACK', $context)) {
+      $context_attrs[] = $context['USER_ATTRIBUTE_FALLBACK'];
+    }
+    $j = 0;
+    while ($j < sizeof($context_attrs)) {
+      $context_attr = $context_attrs[$j];
+      if (array_key_exists($context_attr, $CAS_attrs)) {
+        log_action("DEBUG", "Recherche du contexte avec l'attribut CAS " . $context_attr . ".");
+        log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS de contexte est : " . print_r($CAS_attrs[$context_attr], true));
+        if (!is_array($CAS_attrs[$context_attr]) && array_key_exists($CAS_attrs[$context_attr], $context['LINK'])) {
+          return $context['LINK'][$CAS_attrs[$context_attr]];
+        } else if (is_array($CAS_attrs[$context_attr])) {
+          $possible_context_values = array_keys($context['LINK']);
+          $i = 0;
+          while ($i < sizeof($possible_context_values)) {
+            if (in_array($possible_context_values[$i], $CAS_attrs[$context_attr])) {
+              return $context['LINK'][$possible_context_values[$i]];
+            }
+            $i++;
           }
-          $i++;
         }
       }
+      $j++;
     }
   }
   if (array_key_exists('DOMAIN_MAP', $context) && is_array($context['DOMAIN_MAP'])) {

@@ -104,7 +104,7 @@ $mapping['APP_NAME']=array();
 
 `$context`
 
-Optional global context routing configuration. It maps the current domain or selected CAS attribute values to a context name. Applications can then define context-specific default URLs with `CONTEXT_DEFAULT_LINK`.
+Optional global context routing configuration. It maps selected CAS attribute values or the current domain to a context name. Applications can then define context-specific default URLs with `CONTEXT_DEFAULT_LINK`.
 
 Example:
 
@@ -323,7 +323,16 @@ $context['LINK']['0000000A']='AGRI';
 $context['LINK']['0000000B']='AGRI';
 ```
 
-When both modes are configured, CAS attribute context mapping has priority over domain context mapping. This allows specific establishments, such as agricultural high schools, to override the domain-derived context.
+If some structures do not provide the main context attribute, configure `USER_ATTRIBUTE_FALLBACK`. This is useful for structures identified by SIREN rather than UAI.
+
+```php
+$context['USER_ATTRIBUTE']='ESCOUAICourant';
+$context['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
+$context['LINK']['0000000A']='AGRI';
+$context['LINK']['10000000000000']='COLL';
+```
+
+When both modes are configured, CAS attribute context mapping has priority over domain context mapping. The main attribute is tested first, then `USER_ATTRIBUTE_FALLBACK`, then `DOMAIN_MAP`. This allows final overrides by UAI or SIREN before falling back to the domain-derived context.
 
 Applications can then declare default URLs per context:
 
@@ -331,6 +340,7 @@ Applications can then declare default URLs per context:
 $mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['CONTEXT_A']='https://service-a.example.org';
 $mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['CONTEXT_B']='https://service-b.example.org';
 $mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['AGRI']='https://service-agri.example.org';
+$mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['COLL']='https://service-coll.example.org';
 ```
 
 Keep `LINK` for true establishment-level exceptions:
@@ -374,11 +384,14 @@ $mapping['FALLBACK_APP']['LINK']=array();
 $context['DOMAIN_MAP']['site-a.example.org']='CONTEXT_A';
 $context['USER_ATTRIBUTE']='ESCOUAICourant';
 $context['LINK']['0000000A']='AGRI';
+$context['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
+$context['LINK']['10000000000000']='COLL';
 
 $mapping['CONTEXT_APP']['USER_ATTRIBUTE']='ESCOUAICourant';
 $mapping['CONTEXT_APP']['LINK']=array();
 $mapping['CONTEXT_APP']['CONTEXT_DEFAULT_LINK']['CONTEXT_A']='https://context-a.example.org';
 $mapping['CONTEXT_APP']['CONTEXT_DEFAULT_LINK']['AGRI']='https://agri.example.org';
+$mapping['CONTEXT_APP']['CONTEXT_DEFAULT_LINK']['COLL']='https://coll.example.org';
 $mapping['CONTEXT_APP']['DEFAULT_LINK']='https://default.example.org';
 $mapping['CONTEXT_APP']['LINK']['0000000B']='https://specific-school.example.org';
 ```
