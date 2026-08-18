@@ -10,6 +10,8 @@ Real configuration files are private and must not be committed. Use the `*.examp
 
 Minimum log level written by `log_action()`. Supported values are `TRACE`, `DEBUG`, `INFO`, `WARN`, and `ERROR`. The comparison is case-sensitive.
 
+`DEBUG` and `TRACE` are intended for troubleshooting. They may include CAS attributes, request parameters, or mapping details. Do not keep these levels enabled for regular production usage unless the resulting logs are handled as sensitive data.
+
 Example:
 
 ```php
