@@ -36,8 +36,8 @@ function can_access($conf_property){
     log_action("TRACE", "Un filtre sur l'accès est défini et les proriétées USER_ATTRIBUTE et REGEX sont définies.");
     log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour le filtre avec le lien est : ".$filter_attr);
     log_action("DEBUG", "Le tableau des propriétés du filtre est : ".print_r($conf_property['FILTER'], true));
-    log_action("DEBUG", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$filter_attr], true));
     if (array_key_exists($filter_attr, $CAS_attrs)){
+      log_action("DEBUG", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$filter_attr], true));
       log_action("TRACE", "L'attribut utilisateur nécessaire au filtre est fourni par le serveur CAS.");
       if (!is_array($CAS_attrs[$filter_attr])){
         if (preg_match($regex, $CAS_attrs[$filter_attr])){
@@ -62,7 +62,7 @@ function can_access($conf_property){
         }
         $i++;
       }
-      if (!found){
+      if (!$found){
         log_action("INFO", "Le filtre interdit l'accès à l'utilisateur !");
       }
       return $found;
