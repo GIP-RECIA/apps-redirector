@@ -31,10 +31,23 @@ static $etab = array();
 $mapping['APPS_NAME']['USER_ATTRIBUTE']='ENTPersonProfils';
 //définition du mapping valeur attribut et lien.
 $mapping['APPS_NAME']['LINK']['PROFIL_1']='http://AN_URL';
+//définition facultative d'un lien par défaut si aucun lien spécifique n'est trouvé.
+$mapping['APPS_NAME']['DEFAULT_LINK']='http://A_DEFAULT_URL';
+//une chaîne vide ou la valeur 'null' indique qu'aucune redirection ne doit être effectuée.
+$mapping['APPS_NAME']['LINK']['PROFIL_WITHOUT_REDIRECT']='null';
+//définition facultative d'un remplacement de variable dans toutes les urls de redirection.
+$mapping['APPS_NAME']['LINK']['PROFIL_WITH_PLACEHOLDER']='https://%ESCOUAICourant%.example.org';
+$mapping['APPS_NAME']['REPLACE']['USER_ATTRIBUTE']='ESCOUAICourant';
+$mapping['APPS_NAME']['REPLACE']['VALUE_TO_LOWERCASE']=true;
 //définition facultative d'un filtre sur un autre attribut fourni dans le ticket CAS afin d'empêcher certains utilisateurs d'accéder à l'application.
 $mapping['APPS_NAME']['FILTER']['USER_ATTRIBUTE']='ENTPersonJointure';
 // regex à appliquer sur la ou les valeurs de l'attribut fourni par le CAS afin de déterminer si l'utilisateur à le droit d'accès.
 $mapping['APPS_NAME']['FILTER']['REGEX']='A REGEX';
+//définition alternative d'un mapping par domaine. DOMAIN est la valeur courante à tester, DOMAIN_MAP contient les associations domaine/url.
+$mapping['APPS_NAME_BY_DOMAIN']['DOMAIN']=$_SERVER['SERVER_NAME'];
+$mapping['APPS_NAME_BY_DOMAIN']['DEFAULT_LINK']='http://A_DEFAULT_URL';
+$mapping['APPS_NAME_BY_DOMAIN']['DOMAIN_MAP']=array();
+$mapping['APPS_NAME_BY_DOMAIN']['DOMAIN_MAP']['domain.example.org']='http://AN_URL';
 */
 
 /*
