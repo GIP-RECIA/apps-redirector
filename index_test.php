@@ -267,9 +267,14 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
         $redirect_rslt = array_key_exists($current_domain, $mapping[$appli]['DOMAIN_MAP']) ? $mapping[$appli]['DOMAIN_MAP'][$current_domain] : null;
         $default_redirect = array_key_exists('DEFAULT_LINK', $mapping[$appli]) ? $mapping[$appli]['DEFAULT_LINK'] : null;
         log_action("DEBUG", "Recherche de l'URL de redirection pour le domaine courant '". $current_domain ."'");
+        if (is_null($redirect_rslt)) {
+          log_action("INFO", "Aucune URL n'est configurée pour le domaine courant '" . $current_domain . "' et l'application " . $appli . ".");
+        }
         if (is_null($redirect_rslt) && ! is_null($default_redirect)) {
           log_action("DEBUG", "Mapping de domaine sur domaine non configuré, appliquer redirection sur l'URL par défaut défini");
           $redirect_rslt = $default_redirect;
+        } else if (is_null($redirect_rslt)) {
+          log_action("INFO", "Aucun DEFAULT_LINK n'est défini pour l'application " . $appli . ".");
         }
         // si url de redirect OK
         if (! is_null($redirect_rslt)) do_redirect($mapping[$appli], $redirect_rslt);
@@ -297,7 +302,7 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
           // si url de redirect OK
           if (! is_null($redirect_rslt)) do_redirect($mapping[$appli], $redirect_rslt);
           // sinon message d'erreur
-          log_action("DEBUG", "Aucune url de redirection n'a été trouvée.");
+          log_action("INFO", "Aucune URL de redirection n'a été trouvée pour l'application " . $appli . " avec l'attribut " . $user_attr . ".");
           echo $msg_access_problem;
         } catch (Exception $e) {
           echo $msg_access_problem;
