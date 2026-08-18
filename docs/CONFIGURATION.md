@@ -261,6 +261,8 @@ In short:
 
 This is similar to `USER_ATTRIBUTE` and `LINK`, but the selected value comes from the request domain instead of CAS attributes.
 
+If the current domain is not present in `DOMAIN_MAP`, the redirector uses `DEFAULT_LINK` when it is configured. If neither a matching domain nor `DEFAULT_LINK` is available, the user receives the standard access problem message.
+
 ## Examples
 
 ### Mapping By CAS Profile

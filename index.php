@@ -264,8 +264,8 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
       log_action("DEBUG", "Le tableau des liens associés aux domaines courants définis pour l'application est : ".print_r($mapping[$appli], true));
       try {
         $current_domain = $mapping[$appli]['DOMAIN'];
-        $redirect_rslt = $mapping[$appli]['DOMAIN_MAP'][$current_domain];
-        $default_redirect = $mapping[$appli]['DEFAULT_LINK'];
+        $redirect_rslt = array_key_exists($current_domain, $mapping[$appli]['DOMAIN_MAP']) ? $mapping[$appli]['DOMAIN_MAP'][$current_domain] : null;
+        $default_redirect = array_key_exists('DEFAULT_LINK', $mapping[$appli]) ? $mapping[$appli]['DEFAULT_LINK'] : null;
         log_action("DEBUG", "Recherche de l'URL de redirection pour le domaine courant '". $current_domain ."'");
         if (is_null($redirect_rslt) && ! is_null($default_redirect)) {
           log_action("DEBUG", "Mapping de domaine sur domaine non configuré, appliquer redirection sur l'URL par défaut défini");
