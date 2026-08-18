@@ -222,6 +222,14 @@ Controls the case applied to the CAS attribute value before replacement.
 
 By default, the value is lowercased. If `VALUE_TO_LOWERCASE` is set to `false`, the value is uppercased.
 
+Current behavior:
+
+- option not defined: the replacement value is lowercased
+- `VALUE_TO_LOWERCASE=true`: the replacement value is lowercased
+- `VALUE_TO_LOWERCASE=false`: the replacement value is uppercased
+
+There is currently no option to keep the original CAS attribute casing unchanged.
+
 Example:
 
 ```php
