@@ -2,3 +2,4 @@ conf/conf.inc.php
 conf/conf.inc.test.php
 conf/cas.inc.php
 conf/cas-test.inc.php
+conf/*.bkp.*
