@@ -1,8 +1,3 @@
----
-name: esco-apps-redirector-context
-description: Use when working on this esco-apps-redirector PHP project, especially index.php, index_test.php, CAS redirection, mappings, filters, or dev mode.
----
-
 # ESCO Apps Redirector Context
 
 ## Project Overview
@@ -16,7 +11,7 @@ There is no `index.html`. The main entry points are:
 - `index.php`: production entry point, loads `conf/conf.inc.php`.
 - `index_test.php`: dev/test entry point, loads `conf/conf.inc.test.php`.
 
-Both files are nearly identical aside from the configuration file they include.
+`index_test.php` is intentionally available to test code changes before reporting validated changes back to `index.php`.
 
 ## Key Files
 
@@ -24,6 +19,7 @@ Both files are nearly identical aside from the configuration file they include.
 - `index_test.php`: test/dev CAS redirect flow.
 - `commonFunction.php`: shared logging and authorized IP/subnet helper.
 - `conf/conf.inc.example.php`: example app mapping and global settings.
+- `conf/conf.inc.test.example.php`: example test/dev app configuration overlay.
 - `conf/cas.inc.example.php`: example CAS server/session configuration.
 - `.htaccess`: disables caching and sets PHP session cookie path for Apache/mod_php5.
 - `conf/.htaccess`: denies direct access to config files except localhost.
@@ -59,7 +55,7 @@ Attribute mapping can use `USER_ATTRIBUTE_FALLBACK` if the main attribute does n
 
 - `can_access($conf_property)`: checks optional `FILTER` configuration against a CAS attribute using a regex.
 - `do_replacement($conf_property, $chaine)`: replaces `%USER_ATTRIBUTE%` placeholder using a CAS attribute value.
-- `do_redirect($conf_property, $url)`: logs, checks access, then sends redirect headers unless `$DEV_MOD` is true.
+- `do_redirect($conf_property, $url)`: validates the redirect target, applies replacements, checks access, then sends redirect headers unless `$DEV_MOD` is true.
 - `find_cas_attr($user_attr, $appli)`: finds a redirect URL from the configured CAS attribute value.
 
 ## Known Issues And Risks
@@ -76,6 +72,13 @@ Attribute mapping can use `USER_ATTRIBUTE_FALLBACK` if the main attribute does n
 - Empty redirect targets and the literal string `"null"` are treated as no redirect.
 - `do_redirect()` applies `do_replacement()` to all redirect targets before sending the `Location` header.
 
-## Development Mode Note
+## Private Configuration
 
-`index_test.php` exists specifically for dev/test mode and loads `conf/conf.inc.test.php`. Do not assume `DEV_MOD=true` is intended for `index.php` production usage.
+The real configuration files are private and ignored by Git:
+
+- `conf/conf.inc.php`
+- `conf/conf.inc.test.php`
+- `conf/cas.inc.php`
+- `conf/cas-test.inc.php`
+
+Do not commit real local values from these files.
