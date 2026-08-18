@@ -332,7 +332,7 @@ $context['LINK']['0000000A']='AGRI';
 $context['LINK']['10000000000000']='COLL';
 ```
 
-When both modes are configured, `DOMAIN_MAP` provides the base context. Then the main CAS attribute and `USER_ATTRIBUTE_FALLBACK` are tested as final overrides. This allows UAI or SIREN-specific cases to override the domain-derived context while keeping domain mapping as the default mechanism.
+When both modes are configured, `DOMAIN_MAP` provides the base context. Then the main CAS attribute and `USER_ATTRIBUTE_FALLBACK` are tested as final overrides. An override is applied only if the current application defines a matching `CONTEXT_DEFAULT_LINK`; otherwise the domain-derived context is kept.
 
 Applications can then declare default URLs per context:
 

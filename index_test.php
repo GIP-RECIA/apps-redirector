@@ -165,13 +165,19 @@ function find_context($conf_property) {
         log_action("DEBUG", "Recherche du contexte avec l'attribut CAS " . $context_attr . ".");
         log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS de contexte est : " . print_r($CAS_attrs[$context_attr], true));
         if (!is_array($CAS_attrs[$context_attr]) && array_key_exists($CAS_attrs[$context_attr], $context['LINK'])) {
-          return $context['LINK'][$CAS_attrs[$context_attr]];
+          $override_context = $context['LINK'][$CAS_attrs[$context_attr]];
+          if (array_key_exists('CONTEXT_DEFAULT_LINK', $conf_property) && array_key_exists($override_context, $conf_property['CONTEXT_DEFAULT_LINK'])) {
+            return $override_context;
+          }
         } else if (is_array($CAS_attrs[$context_attr])) {
           $possible_context_values = array_keys($context['LINK']);
           $i = 0;
           while ($i < sizeof($possible_context_values)) {
             if (in_array($possible_context_values[$i], $CAS_attrs[$context_attr])) {
-              return $context['LINK'][$possible_context_values[$i]];
+              $override_context = $context['LINK'][$possible_context_values[$i]];
+              if (array_key_exists('CONTEXT_DEFAULT_LINK', $conf_property) && array_key_exists($override_context, $conf_property['CONTEXT_DEFAULT_LINK'])) {
+                return $override_context;
+              }
             }
             $i++;
           }
