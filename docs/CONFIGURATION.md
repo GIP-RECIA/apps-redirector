@@ -267,7 +267,7 @@ Example:
 $mapping['APP_NAME']['REPLACE']['VALUE_TO_LOWERCASE']=false;
 ```
 
-Replacement is applied centrally before redirecting, so it works for URLs coming from `LINK`, `DEFAULT_LINK`, and `DOMAIN_MAP`.
+Replacement is applied centrally before redirecting, so it works for URLs coming from `LINK`, `CONTEXT_DEFAULT_LINK`, `DEFAULT_LINK`, and `DOMAIN_MAP`.
 
 ## Domain-Based Mapping
 
