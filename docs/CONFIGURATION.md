@@ -102,17 +102,6 @@ Example:
 $mapping['APP_NAME']=array();
 ```
 
-`$context`
-
-Optional global context routing configuration. It maps selected CAS attribute values or the current domain to a context name. Applications can then define context-specific default URLs with `CONTEXT_DEFAULT_LINK`.
-
-Example:
-
-```php
-$context['DOMAIN_MAP']['site-a.example.org']='CONTEXT_A';
-$context['DOMAIN_MAP']['site-b.example.org']='CONTEXT_B';
-```
-
 `$etab`
 
 Optional establishment metadata table, mainly used by JSON/config helper endpoints.
@@ -188,21 +177,16 @@ Example:
 $mapping['APP_NAME']['DEFAULT_LINK']='https://default.example.org';
 ```
 
-`CONTEXT_DEFAULT_LINK`
-
-Optional map of context names to default target URLs. It is used before `DEFAULT_LINK` when a context is resolved.
-
-Example:
-
-```php
-$mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['CONTEXT_A']='https://context-a.example.org';
-$mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['CONTEXT_B']='https://context-b.example.org';
-```
-
-The redirect resolution order is:
+For attribute-based mappings, the redirect resolution order is:
 
 1. explicit `LINK` match for the application
-2. `CONTEXT_DEFAULT_LINK` for the resolved context
+2. application `DEFAULT_LINK`
+3. standard access problem message
+
+For domain-based mappings, the redirect resolution order is:
+
+1. explicit `LINK` match for the application, when `USER_ATTRIBUTE`/`USER_ATTRIBUTE_FALLBACK` and `LINK` are also configured
+2. `DOMAIN_MAP` match for the current domain
 3. application `DEFAULT_LINK`
 4. standard access problem message
 
@@ -267,11 +251,13 @@ Example:
 $mapping['APP_NAME']['REPLACE']['VALUE_TO_LOWERCASE']=false;
 ```
 
-Replacement is applied centrally before redirecting, so it works for URLs coming from `LINK`, `CONTEXT_DEFAULT_LINK`, `DEFAULT_LINK`, and `DOMAIN_MAP`.
+Replacement is applied centrally before redirecting, so it works for URLs coming from `LINK`, `DEFAULT_LINK`, and `DOMAIN_MAP`.
 
 ## Domain-Based Mapping
 
 Use `DOMAIN` and `DOMAIN_MAP` when the redirect depends on the current HTTP host rather than a CAS attribute.
+
+This is the preferred model when the application URL is controlled and already identifies the user context, for example one service URL per ENT domain. Establishment-specific `LINK` entries can still be added to override the domain result for known exceptions.
 
 `DOMAIN`
 
@@ -302,52 +288,23 @@ In short:
 
 This is similar to `USER_ATTRIBUTE` and `LINK`, but the selected value comes from the request domain instead of CAS attributes.
 
-If the current domain is not present in `DOMAIN_MAP`, the redirector uses `DEFAULT_LINK` when it is configured. If neither a matching domain nor `DEFAULT_LINK` is available, the user receives the standard access problem message.
+If the application also defines `USER_ATTRIBUTE`, `USER_ATTRIBUTE_FALLBACK`, and `LINK`, `LINK` is checked first. This allows an application to use domain routing as the normal behavior and keep explicit establishment overrides for exceptions.
 
-## Context-Based Defaults
-
-Context-based defaults are useful when many establishments share the same target URL depending on the current portal/domain. They avoid repeating the same URL for each UAI in `LINK`.
-
-The global `$context` table can resolve a context from the current domain:
+Example:
 
 ```php
-$context['DOMAIN_MAP']['site-a.example.org']='CONTEXT_A';
-$context['DOMAIN_MAP']['site-b.example.org']='CONTEXT_B';
+$mapping['APP_NAME']['DOMAIN']=$_SERVER['SERVER_NAME'];
+$mapping['APP_NAME']['USER_ATTRIBUTE']='ESCOUAICourant';
+$mapping['APP_NAME']['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
+$mapping['APP_NAME']['LINK']=array();
+$mapping['APP_NAME']['LINK']['0000000A']='https://specific-school.example.org';
+$mapping['APP_NAME']['DOMAIN_MAP']=array();
+$mapping['APP_NAME']['DOMAIN_MAP']['site-a.example.org']='https://service-a.example.org';
+$mapping['APP_NAME']['DOMAIN_MAP']['site-b.example.org']='https://service-b.example.org';
+$mapping['APP_NAME']['DEFAULT_LINK']='https://default.example.org';
 ```
 
-It can also resolve a context from a CAS attribute for exceptions that cannot be inferred from the domain:
-
-```php
-$context['USER_ATTRIBUTE']='ESCOUAICourant';
-$context['LINK']['0000000A']='AGRI';
-$context['LINK']['0000000B']='AGRI';
-```
-
-If some structures do not provide the main context attribute, configure `USER_ATTRIBUTE_FALLBACK`. This is useful for structures identified by SIREN rather than UAI.
-
-```php
-$context['USER_ATTRIBUTE']='ESCOUAICourant';
-$context['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
-$context['LINK']['0000000A']='AGRI';
-$context['LINK']['10000000000000']='COLL';
-```
-
-When both modes are configured, `DOMAIN_MAP` provides the base context. Then the main CAS attribute and `USER_ATTRIBUTE_FALLBACK` are tested as final overrides. An override is applied only if the current application defines a matching `CONTEXT_DEFAULT_LINK`; otherwise the domain-derived context is kept.
-
-Applications can then declare default URLs per context:
-
-```php
-$mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['CONTEXT_A']='https://service-a.example.org';
-$mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['CONTEXT_B']='https://service-b.example.org';
-$mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['AGRI']='https://service-agri.example.org';
-$mapping['APP_NAME']['CONTEXT_DEFAULT_LINK']['COLL']='https://service-coll.example.org';
-```
-
-Keep `LINK` for true establishment-level exceptions:
-
-```php
-$mapping['APP_NAME']['LINK']['0000000C']='https://specific-school.example.org';
-```
+If no `LINK` override matches and the current domain is not present in `DOMAIN_MAP`, the redirector uses `DEFAULT_LINK` when it is configured. If neither a matching override, domain, nor `DEFAULT_LINK` is available, the user receives the standard access problem message.
 
 ## Examples
 
@@ -378,24 +335,6 @@ $mapping['FALLBACK_APP']['DEFAULT_LINK']='https://default.example.org';
 $mapping['FALLBACK_APP']['LINK']=array();
 ```
 
-### Mapping With Context Default Links
-
-```php
-$context['DOMAIN_MAP']['site-a.example.org']='CONTEXT_A';
-$context['USER_ATTRIBUTE']='ESCOUAICourant';
-$context['LINK']['0000000A']='AGRI';
-$context['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
-$context['LINK']['10000000000000']='COLL';
-
-$mapping['CONTEXT_APP']['USER_ATTRIBUTE']='ESCOUAICourant';
-$mapping['CONTEXT_APP']['LINK']=array();
-$mapping['CONTEXT_APP']['CONTEXT_DEFAULT_LINK']['CONTEXT_A']='https://context-a.example.org';
-$mapping['CONTEXT_APP']['CONTEXT_DEFAULT_LINK']['AGRI']='https://agri.example.org';
-$mapping['CONTEXT_APP']['CONTEXT_DEFAULT_LINK']['COLL']='https://coll.example.org';
-$mapping['CONTEXT_APP']['DEFAULT_LINK']='https://default.example.org';
-$mapping['CONTEXT_APP']['LINK']['0000000B']='https://specific-school.example.org';
-```
-
 ### Mapping With Placeholder Replacement
 
 ```php
@@ -413,6 +352,20 @@ $mapping['DOMAIN_APP']['DEFAULT_LINK']='https://default.example.org';
 $mapping['DOMAIN_APP']['DOMAIN_MAP']=array();
 $mapping['DOMAIN_APP']['DOMAIN_MAP']['site-a.example.org']='https://service-a.example.org';
 $mapping['DOMAIN_APP']['DOMAIN_MAP']['site-b.example.org']='https://service-b.example.org';
+```
+
+### Mapping By Domain With Establishment Overrides
+
+```php
+$mapping['DOMAIN_OVERRIDE_APP']['DOMAIN']=$_SERVER['SERVER_NAME'];
+$mapping['DOMAIN_OVERRIDE_APP']['USER_ATTRIBUTE']='ESCOUAICourant';
+$mapping['DOMAIN_OVERRIDE_APP']['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
+$mapping['DOMAIN_OVERRIDE_APP']['LINK']=array();
+$mapping['DOMAIN_OVERRIDE_APP']['LINK']['0000000A']='https://specific-school.example.org';
+$mapping['DOMAIN_OVERRIDE_APP']['DOMAIN_MAP']=array();
+$mapping['DOMAIN_OVERRIDE_APP']['DOMAIN_MAP']['site-a.example.org']='https://service-a.example.org';
+$mapping['DOMAIN_OVERRIDE_APP']['DOMAIN_MAP']['site-b.example.org']='https://service-b.example.org';
+$mapping['DOMAIN_OVERRIDE_APP']['DEFAULT_LINK']='https://default.example.org';
 ```
 
 ### Mapping With Access Filter

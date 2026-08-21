@@ -50,15 +50,17 @@ Two mapping modes exist:
 
 Attribute mapping can use `USER_ATTRIBUTE_FALLBACK` if the main attribute does not produce a redirect.
 
-`DEFAULT_LINK` can be used as a fallback in some branches.
+Domain mapping can also use application-level `LINK` entries as establishment overrides before falling back to `DOMAIN_MAP`.
+
+`DEFAULT_LINK` can be used as a fallback in supported branches.
 
 ## Important Functions
 
 - `can_access($conf_property)`: checks optional `FILTER` configuration against a CAS attribute using a regex.
 - `do_replacement($conf_property, $chaine)`: replaces `%USER_ATTRIBUTE%` placeholder using a CAS attribute value.
 - `do_redirect($conf_property, $url)`: validates the redirect target, applies replacements, checks access, then sends redirect headers unless `$DEV_MOD` is true.
-- `find_context($conf_property)`: resolves an optional global routing context from the current domain, then applies CAS attribute overrides such as UAI or SIREN.
-- `find_default_link($conf_property)`: resolves an application default URL, preferring `CONTEXT_DEFAULT_LINK` before `DEFAULT_LINK`.
+- `find_default_link($conf_property)`: resolves an application default URL from `DEFAULT_LINK`.
+- `find_link_override($conf_property)`: resolves an optional application-level `LINK` override before domain mapping.
 - `find_cas_attr($user_attr, $appli)`: finds a redirect URL from the configured CAS attribute value.
 
 ## Known Issues And Risks
@@ -74,7 +76,7 @@ Attribute mapping can use `USER_ATTRIBUTE_FALLBACK` if the main attribute does n
 - Redirects now use HTTP 302 instead of HTTP 301.
 - Empty redirect targets and the literal string `"null"` are treated as no redirect.
 - `do_redirect()` applies `do_replacement()` to all redirect targets before sending the `Location` header.
-- Context-specific defaults are supported through global `$context` and per-application `CONTEXT_DEFAULT_LINK`.
+- Domain mappings can use application-level `LINK` overrides for establishment-specific exceptions.
 
 ## Private Configuration
 

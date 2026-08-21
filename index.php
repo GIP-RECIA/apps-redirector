@@ -137,68 +137,7 @@ function do_redirect($conf_property,$url) {
   }
 }
 
-function find_context($conf_property) {
-  global $CAS_attrs, $context;
-  if (!isset($context) || !is_array($context)) {
-    return;
-  }
-  $current_context = null;
-  if (array_key_exists('DOMAIN_MAP', $context) && is_array($context['DOMAIN_MAP'])) {
-    $current_domain = array_key_exists('DOMAIN', $context) ? $context['DOMAIN'] : $_SERVER['SERVER_NAME'];
-    log_action("DEBUG", "Recherche du contexte avec le domaine courant '" . $current_domain . "'.");
-    if (array_key_exists($current_domain, $context['DOMAIN_MAP'])) {
-      $current_context = $context['DOMAIN_MAP'][$current_domain];
-    }
-  }
-  if (array_key_exists('LINK', $context) && is_array($context['LINK'])) {
-    $context_attrs = array();
-    if (array_key_exists('USER_ATTRIBUTE', $context)) {
-      $context_attrs[] = $context['USER_ATTRIBUTE'];
-    }
-    if (array_key_exists('USER_ATTRIBUTE_FALLBACK', $context)) {
-      $context_attrs[] = $context['USER_ATTRIBUTE_FALLBACK'];
-    }
-    $j = 0;
-    while ($j < sizeof($context_attrs)) {
-      $context_attr = $context_attrs[$j];
-      if (array_key_exists($context_attr, $CAS_attrs)) {
-        log_action("DEBUG", "Recherche du contexte avec l'attribut CAS " . $context_attr . ".");
-        log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS de contexte est : " . print_r($CAS_attrs[$context_attr], true));
-        if (!is_array($CAS_attrs[$context_attr]) && array_key_exists($CAS_attrs[$context_attr], $context['LINK'])) {
-          $override_context = $context['LINK'][$CAS_attrs[$context_attr]];
-          if (array_key_exists('CONTEXT_DEFAULT_LINK', $conf_property) && array_key_exists($override_context, $conf_property['CONTEXT_DEFAULT_LINK'])) {
-            return $override_context;
-          }
-        } else if (is_array($CAS_attrs[$context_attr])) {
-          $possible_context_values = array_keys($context['LINK']);
-          $i = 0;
-          while ($i < sizeof($possible_context_values)) {
-            if (in_array($possible_context_values[$i], $CAS_attrs[$context_attr])) {
-              $override_context = $context['LINK'][$possible_context_values[$i]];
-              if (array_key_exists('CONTEXT_DEFAULT_LINK', $conf_property) && array_key_exists($override_context, $conf_property['CONTEXT_DEFAULT_LINK'])) {
-                return $override_context;
-              }
-            }
-            $i++;
-          }
-        }
-      }
-      $j++;
-    }
-  }
-  return $current_context;
-}
-
 function find_default_link($conf_property) {
-  global $appli;
-  $current_context = find_context($conf_property);
-  if (!is_null($current_context) && array_key_exists('CONTEXT_DEFAULT_LINK', $conf_property) && array_key_exists($current_context, $conf_property['CONTEXT_DEFAULT_LINK'])) {
-    log_action("DEBUG", "Utilisation du lien par défaut du contexte " . $current_context . " pour l'application " . $appli . ".");
-    return $conf_property['CONTEXT_DEFAULT_LINK'][$current_context];
-  }
-  if (!is_null($current_context)) {
-    log_action("DEBUG", "Aucun lien par défaut n'est défini pour le contexte " . $current_context . " et l'application " . $appli . ".");
-  }
   if (array_key_exists('DEFAULT_LINK', $conf_property)) {
     log_action("TRACE", "Nous sommes dans le cas de l'utilisation du lien par défaut.");
     return $conf_property['DEFAULT_LINK'];
@@ -210,24 +149,24 @@ function find_link_override($conf_property) {
   if (!array_key_exists('LINK', $conf_property) || !is_array($conf_property['LINK'])) {
     return;
   }
-  $context_attrs = array();
+  $override_attrs = array();
   if (array_key_exists('USER_ATTRIBUTE', $conf_property)) {
-    $context_attrs[] = $conf_property['USER_ATTRIBUTE'];
+    $override_attrs[] = $conf_property['USER_ATTRIBUTE'];
   }
   if (array_key_exists('USER_ATTRIBUTE_FALLBACK', $conf_property)) {
-    $context_attrs[] = $conf_property['USER_ATTRIBUTE_FALLBACK'];
+    $override_attrs[] = $conf_property['USER_ATTRIBUTE_FALLBACK'];
   }
   $j = 0;
-  while ($j < sizeof($context_attrs)) {
-    $context_attr = $context_attrs[$j];
-    if (array_key_exists($context_attr, $CAS_attrs)) {
-      if (!is_array($CAS_attrs[$context_attr]) && array_key_exists($CAS_attrs[$context_attr], $conf_property['LINK'])) {
-        return $conf_property['LINK'][$CAS_attrs[$context_attr]];
-      } else if (is_array($CAS_attrs[$context_attr])) {
+  while ($j < sizeof($override_attrs)) {
+    $override_attr = $override_attrs[$j];
+    if (array_key_exists($override_attr, $CAS_attrs)) {
+      if (!is_array($CAS_attrs[$override_attr]) && array_key_exists($CAS_attrs[$override_attr], $conf_property['LINK'])) {
+        return $conf_property['LINK'][$CAS_attrs[$override_attr]];
+      } else if (is_array($CAS_attrs[$override_attr])) {
         $possible_values = array_keys($conf_property['LINK']);
         $i = 0;
         while ($i < sizeof($possible_values)) {
-          if (in_array($possible_values[$i], $CAS_attrs[$context_attr])) {
+          if (in_array($possible_values[$i], $CAS_attrs[$override_attr])) {
             return $conf_property['LINK'][$possible_values[$i]];
           }
           $i++;
