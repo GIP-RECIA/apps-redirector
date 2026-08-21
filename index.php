@@ -205,6 +205,39 @@ function find_default_link($conf_property) {
   }
 }
 
+function find_link_override($conf_property) {
+  global $CAS_attrs;
+  if (!array_key_exists('LINK', $conf_property) || !is_array($conf_property['LINK'])) {
+    return;
+  }
+  $context_attrs = array();
+  if (array_key_exists('USER_ATTRIBUTE', $conf_property)) {
+    $context_attrs[] = $conf_property['USER_ATTRIBUTE'];
+  }
+  if (array_key_exists('USER_ATTRIBUTE_FALLBACK', $conf_property)) {
+    $context_attrs[] = $conf_property['USER_ATTRIBUTE_FALLBACK'];
+  }
+  $j = 0;
+  while ($j < sizeof($context_attrs)) {
+    $context_attr = $context_attrs[$j];
+    if (array_key_exists($context_attr, $CAS_attrs)) {
+      if (!is_array($CAS_attrs[$context_attr]) && array_key_exists($CAS_attrs[$context_attr], $conf_property['LINK'])) {
+        return $conf_property['LINK'][$CAS_attrs[$context_attr]];
+      } else if (is_array($CAS_attrs[$context_attr])) {
+        $possible_values = array_keys($conf_property['LINK']);
+        $i = 0;
+        while ($i < sizeof($possible_values)) {
+          if (in_array($possible_values[$i], $CAS_attrs[$context_attr])) {
+            return $conf_property['LINK'][$possible_values[$i]];
+          }
+          $i++;
+        }
+      }
+    }
+    $j++;
+  }
+}
+
 /**
 * Retourn l'url de redirection si OK, null si attribut utilisateur non existant et throw exception si pas de droits d'accès
 */
@@ -339,7 +372,10 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
       log_action("TRACE", "Le tableau des liens associés aux domaines courants définis pour l'application est : ".print_r($mapping[$appli], true));
       try {
         $current_domain = $mapping[$appli]['DOMAIN'];
-        $redirect_rslt = array_key_exists($current_domain, $mapping[$appli]['DOMAIN_MAP']) ? $mapping[$appli]['DOMAIN_MAP'][$current_domain] : null;
+        $redirect_rslt = find_link_override($mapping[$appli]);
+        if (is_null($redirect_rslt)) {
+          $redirect_rslt = array_key_exists($current_domain, $mapping[$appli]['DOMAIN_MAP']) ? $mapping[$appli]['DOMAIN_MAP'][$current_domain] : null;
+        }
         $default_redirect = array_key_exists('DEFAULT_LINK', $mapping[$appli]) ? $mapping[$appli]['DEFAULT_LINK'] : null;
         log_action("DEBUG", "Recherche de l'URL de redirection pour le domaine courant '". $current_domain ."'");
         if (is_null($redirect_rslt)) {
