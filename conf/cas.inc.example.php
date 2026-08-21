@@ -3,6 +3,10 @@ $host='cas.univ.fr';
 $port=443;
 $uri='cas';
 $protocol=SAML_VERSION_1_1;
+$cas_service_base_urls=array(
+  'https://domain.example.org',
+  'https://other-domain.example.org',
+);
 $cas_server_ca_cert_path='/path/to/cert/my_ca_cert.pem';
 // proxies server names and servers fro rebroadcast
 $cas_real_hosts=array(

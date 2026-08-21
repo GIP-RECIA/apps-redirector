@@ -4,7 +4,7 @@ $LOG_LVL="INFO"; // TRACE,DEBUG,INFO,WARN,ERROR sont les valeurs possibles, atte
 //$LOG_LVL="DEBUG"; // TRACE,DEBUG,INFO,WARN,ERROR sont les valeurs possibles, attention à la CASSE !
 // passer dev_mod à true affiche certains log dans le HTML et évite d'effectuer les redirections.
 $DEV_MOD=false;
-$PATH_CAS_LIB="/var/www/phpCAS/phpCAS-1.3.8/CAS.php";
+$PATH_CAS_LIB="/var/www/phpCAS/phpCAS-1.6.2/CAS.php";
 $PATH_CAS_CONFIG="conf/cas.inc.php";
 //$PATH_CAS_CONFIG="conf/cas-test.inc.php";
 $LOG_FILENAME = "logs/" . date("Y-m-d") . ".log";

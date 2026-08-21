@@ -21,7 +21,7 @@ ini_set('session.cookie_httponly', true); // PHP 5.2.0. minimum
 ini_set('session.use_trans_sid', false);
 
 // client CAS init
-phpCAS::client($protocol,$host,$port,$uri, true);
+phpCAS::client($protocol, $host, $port, $uri, $cas_service_base_urls, true);
 
 include_once('commonFunction.php');
 

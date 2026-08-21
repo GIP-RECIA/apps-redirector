@@ -52,6 +52,19 @@ Example:
 $PATH_CAS_CONFIG='conf/cas.inc.php';
 ```
 
+`$cas_service_base_urls`
+
+Allowed client base URLs used by phpCAS 1.6.x to build and validate the CAS service URL. Use all public domains that can serve this redirector. For multidomain deployments, provide an array; phpCAS uses the discovered request host only when it is present in this allowlist, otherwise it falls back to the first entry.
+
+Example:
+
+```php
+$cas_service_base_urls=array(
+  'https://domain.example.org',
+  'https://other-domain.example.org',
+);
+```
+
 `$LOG_FILENAME`
 
 Application log file path. It is commonly date-based.
