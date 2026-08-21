@@ -6,28 +6,30 @@ The script synchronizes the application files from the directory containing the 
 
 ## Quick Usage
 
-Run from the application repository:
+Preview changes from the application repository:
 
 ```bash
 ./deploy-app.sh
 ```
 
-By default, files are synchronized to:
+By default, the script runs in dry-run mode and does not modify the destination.
+
+Files are synchronized to:
 
 ```text
 /var/www/esco-apps-redirector/
 ```
 
-Preview changes without modifying the destination:
+Deploy for real:
 
 ```bash
-DRY_RUN=1 ./deploy-app.sh
+DRY_RUN=0 ./deploy-app.sh
 ```
 
-Deploy to a custom destination:
+Deploy to a custom destination for real:
 
 ```bash
-./deploy-app.sh /path/to/destination/
+DRY_RUN=0 ./deploy-app.sh /path/to/destination/
 ```
 
 ## Table of Contents
@@ -59,13 +61,19 @@ The first argument has priority over `DEST_DIR`.
 
 ## Dry Run
 
-Use `DRY_RUN=1` to preview changes without modifying the destination:
+Dry-run mode is enabled by default. Running the script without `DRY_RUN=0` previews changes without modifying the destination:
 
 ```bash
-DRY_RUN=1 ./deploy-app.sh
+./deploy-app.sh
 ```
 
 This enables `rsync --dry-run --itemize-changes`.
+
+Set `DRY_RUN=0` to perform the synchronization:
+
+```bash
+DRY_RUN=0 ./deploy-app.sh
+```
 
 ## Source Directory
 
@@ -105,9 +113,9 @@ Log files are not synchronized. The script ensures that the destination `logs/` 
 ## Recommended Workflow
 
 1. Update the application source repository.
-2. Preview deployment with `DRY_RUN=1 ./deploy-app.sh`.
+2. Preview deployment with `./deploy-app.sh`.
 3. Review the listed changes.
-4. Run `./deploy-app.sh`.
+4. Run `DRY_RUN=0 ./deploy-app.sh`.
 5. Deploy private configuration separately if needed.
 6. Verify the application through the web entry point.
 

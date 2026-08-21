@@ -6,11 +6,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 DEST_DIR="${1:-${DEST_DIR:-/var/www/esco-apps-redirector/}}"
 
 RSYNC_OPTS=(-a --delete)
-if [ "${DRY_RUN:-0}" = "1" ]; then
+if [ "${DRY_RUN:-1}" != "0" ]; then
   RSYNC_OPTS+=(--dry-run --itemize-changes)
 fi
 
-mkdir -p "$DEST_DIR"
+if [ "${DRY_RUN:-1}" = "0" ]; then
+  mkdir -p "$DEST_DIR"
+fi
 
 rsync "${RSYNC_OPTS[@]}" \
   --exclude='.git/' \
@@ -24,4 +26,6 @@ rsync "${RSYNC_OPTS[@]}" \
   "$SCRIPT_DIR/" \
   "$DEST_DIR"
 
-mkdir -p "$DEST_DIR/logs"
+if [ "${DRY_RUN:-1}" = "0" ]; then
+  mkdir -p "$DEST_DIR/logs"
+fi
