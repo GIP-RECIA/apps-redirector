@@ -132,6 +132,9 @@ getInfosJson.php
 getStatsJson.php
 loading-spinner.js
 conf/getYpareos.sh
+docs/
+AGENTS.md
+opencode.json
 ```
 
 Private configuration files must be deployed separately and are never overwritten by this script.
@@ -139,6 +142,8 @@ Private configuration files must be deployed separately and are never overwritte
 Log files are not synchronized. The script ensures that the destination `logs/` directory exists after synchronization.
 
 The last six entries (`getAllInfos.php`, `getGroupsJson.php`, `getInfosJson.php`, `getStatsJson.php`, `loading-spinner.js`, `conf/getYpareos.sh`) are files managed outside this repository that exist on the deployment target. Excluding them also protects them from deletion by `--delete`.
+
+The final three entries (`docs/`, `AGENTS.md`, `opencode.json`) are development-only artifacts (documentation, agent instructions) with no use on the web server. Excluded paths are never deleted from the destination: remove leftovers manually if a previous deployment copied them.
 
 ## Recommended Workflow
 

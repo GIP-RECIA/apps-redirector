@@ -70,6 +70,9 @@ rsync "${RSYNC_OPTS[@]}" \
   --exclude='getStatsJson.php' \
   --exclude='loading-spinner.js' \
   --exclude='conf/getYpareos.sh' \
+  --exclude='docs/' \
+  --exclude='AGENTS.md' \
+  --exclude='opencode.json' \
   "$SCRIPT_DIR/" \
   "$DEST_DIR"
 
