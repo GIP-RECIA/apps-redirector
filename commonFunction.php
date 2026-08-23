@@ -24,7 +24,7 @@ function log_lvl_to_int($lvl){
   return $val;
 }
 
-function check_autorized_access() {
+function check_authorized_access() {
   global $AUTORIZED_IPS, $AUTORIZED_SUBNET;
   $entry = array();
   if (array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER)) $entry = explode(",",$_SERVER['HTTP_X_FORWARDED_FOR']);

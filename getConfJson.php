@@ -27,7 +27,7 @@ header("Access-Control-Max-Age: 1728000");
 //header("Access-Control-Allow-Headers: Origin, X-Requested-With, X-Prototype-Version,Content-Type, Cache-Control");
 
 #JSON returns
-$allow_access = check_autorized_access();
+$allow_access = check_authorized_access();
 
 if(!$allow_access) {
   log_action("ERROR", "Forbidden Access:");
