@@ -1,3 +1,8 @@
+---
+name: project-context
+description: Project context for esco-apps-redirector, a PHP CAS redirector. Use before any code change in this repository: runtime flow, key files, mapping modes, deployment model, and known issues.
+---
+
 # ESCO Apps Redirector Context
 
 ## Project Overview
@@ -18,8 +23,8 @@ There is no `index.html`. The main entry points are:
 - `index.php`: production CAS redirect flow.
 - `index_test.php`: test/dev CAS redirect flow.
 - `commonFunction.php`: shared logging and authorized IP/subnet helper.
-- `docs/CONFIGURATION.md`: configuration variables and mapping examples.
-- `docs/DEPLOY_APP.md`: application deployment script documentation.
+- `docs/configuration/SKILL.md`: configuration variables and mapping examples.
+- `docs/deploy-app/SKILL.md`: application deployment script documentation.
 - `conf/conf.inc.example.php`: example app mapping and global settings.
 - `conf/conf.inc.test.example.php`: example test/dev app configuration overlay.
 - `conf/cas.inc.example.php`: example CAS server/session configuration.

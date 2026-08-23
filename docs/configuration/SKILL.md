@@ -1,3 +1,8 @@
+---
+name: configuration
+description: Configuration variables and mapping examples for esco-apps-redirector. Use when editing conf files, application mappings, DOMAIN_MAP, USER_ATTRIBUTE, DEFAULT_LINK, LINK overrides, or access FILTERs.
+---
+
 # Configuration
 
 This document describes the main configuration variables used by ESCO Apps Redirector.

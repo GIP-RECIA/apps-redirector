@@ -1,3 +1,8 @@
+---
+name: deploy-app
+description: Application deployment with deploy-app.sh for esco-apps-redirector. Use when deploying the application, running rsync, previewing changes in dry-run mode, or setting DRY_RUN, DEST_DIR, or BACKUP_DIR.
+---
+
 # Application Deployment Script
 
 This document describes `deploy-app.sh`, the application deployment helper.
@@ -149,4 +154,4 @@ conf/cas.inc.php
 conf/cas-test.inc.php
 ```
 
-Before changing private configuration files in production, create a timestamped backup as described in `docs/CONTEXT.md`.
+Before changing private configuration files in production, create a timestamped backup as described in `docs/project-context/SKILL.md`.
