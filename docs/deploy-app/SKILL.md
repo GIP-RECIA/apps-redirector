@@ -126,11 +126,19 @@ conf/cas.inc.php
 conf/cas-test.inc.php
 conf/*.bkp.*
 logs/*
+getAllInfos.php
+getGroupsJson.php
+getInfosJson.php
+getStatsJson.php
+loading-spinner.js
+conf/getYpareos.sh
 ```
 
 Private configuration files must be deployed separately and are never overwritten by this script.
 
 Log files are not synchronized. The script ensures that the destination `logs/` directory exists after synchronization.
+
+The last six entries (`getAllInfos.php`, `getGroupsJson.php`, `getInfosJson.php`, `getStatsJson.php`, `loading-spinner.js`, `conf/getYpareos.sh`) are files managed outside this repository that exist on the deployment target. Excluding them also protects them from deletion by `--delete`.
 
 ## Recommended Workflow
 

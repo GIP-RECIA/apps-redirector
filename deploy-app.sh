@@ -52,7 +52,9 @@ fi
 # 3. Synchronisation du code vers la cible :
 #    - en dry-run : simple affichage des changements qui seraient appliqués
 #    - en réel : copie + suppression (--delete) des fichiers obsolètes
-#    Exclusions : VCS, confs locales/environnement et logs de la cible.
+#    Exclusions : VCS, confs locales/environnement et logs de la cible,
+#    plus fichiers gérés hors de ce dépôt présents sur la cible (protégés
+#    du --delete grâce aux --exclude).
 rsync "${RSYNC_OPTS[@]}" \
   --exclude='.git/' \
   --exclude='.github/' \
@@ -62,6 +64,12 @@ rsync "${RSYNC_OPTS[@]}" \
   --exclude='conf/cas-test.inc.php' \
   --exclude='conf/*.bkp.*' \
   --exclude='logs/*' \
+  --exclude='getAllInfos.php' \
+  --exclude='getGroupsJson.php' \
+  --exclude='getInfosJson.php' \
+  --exclude='getStatsJson.php' \
+  --exclude='loading-spinner.js' \
+  --exclude='conf/getYpareos.sh' \
   "$SCRIPT_DIR/" \
   "$DEST_DIR"
 
