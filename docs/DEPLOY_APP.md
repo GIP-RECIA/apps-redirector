@@ -37,6 +37,7 @@ DRY_RUN=0 ./deploy-app.sh /path/to/destination/
 - [Quick Usage](#quick-usage)
 - [Custom Destination](#custom-destination)
 - [Dry Run](#dry-run)
+- [Script Steps](#script-steps)
 - [Source Directory](#source-directory)
 - [Synchronization Behavior](#synchronization-behavior)
 - [Excluded Paths](#excluded-paths)
@@ -69,11 +70,27 @@ Dry-run mode is enabled by default. Running the script without `DRY_RUN=0` previ
 
 This enables `rsync --dry-run --itemize-changes`.
 
+The script prints this warning banner first:
+
+```text
+MODE DRY-RUN : aucun fichier ne sera modifié, simulation seule (utilisez DRY_RUN=0 pour déployer réellement).
+```
+
 Set `DRY_RUN=0` to perform the synchronization:
 
 ```bash
 DRY_RUN=0 ./deploy-app.sh
 ```
+
+## Script Steps
+
+The script performs the following steps:
+
+0. Configure dry-run mode and rsync options (`--dry-run --itemize-changes` when dry-run is active).
+1. Back up the whole deployed directory before syncing (real run only, only if the destination exists; delete the backup manually once the deployment is validated).
+2. Create the destination directory if missing (real run only).
+3. Synchronize the code with rsync and the excluded paths below: dry-run lists the changes that would be applied, a real run copies files and removes obsolete ones via `--delete`.
+4. Create the destination `logs/` directory after synchronization (real run only; excluded from rsync).
 
 ## Source Directory
 
