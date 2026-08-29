@@ -25,6 +25,16 @@ Example:
 $LOG_LVL='INFO';
 ```
 
+`$DEV_MOD`
+
+Enables diagnostic mode only when the request comes from an address allowed by `$AUTORIZED_IPS` or `$AUTORIZED_SUBNET`. It enables `display_errors` and shows the resolved 302 `Location` header instead of redirecting.
+
+Keep it disabled by default:
+
+```php
+$DEV_MOD=false;
+```
+
 `$PATH_CAS_LIB`
 
 Path to the phpCAS library entry point.

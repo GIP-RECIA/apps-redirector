@@ -25,6 +25,13 @@ phpCAS::client($protocol, $host, $port, $uri, $cas_service_base_urls, true);
 
 include_once('commonFunction.php');
 
+// Diagnostic output is available only from explicitly authorized IP addresses.
+$DEV_MOD = isset($DEV_MOD) && $DEV_MOD && check_authorized_access();
+if ($DEV_MOD) {
+  error_reporting(E_ALL);
+  ini_set('display_errors', 'On');
+}
+
 function can_access($conf_property){
   global $CAS_attrs,$msg_access_problem;
   // Vérifie s'il y a un filtre d'accés
@@ -112,7 +119,7 @@ function do_replacement($conf_property,$chaine){
 }
 
 function do_redirect($conf_property,$url) {
-  global $appli, $msg_access_problem;
+  global $appli, $DEV_MOD, $msg_access_problem;
   if (is_null($url) || trim($url) === '' || strtolower(trim($url)) === 'null') {
     log_action("INFO", "Aucune redirection n'est définie pour l'application " . $appli . "  !");
     echo $msg_access_problem;
@@ -123,6 +130,11 @@ function do_redirect($conf_property,$url) {
   if (!can_access($conf_property)){
     log_action("ERROR", "L'utilisater " . phpCAS::getUser() . " n'a pas les droits pour accéder à l'application " . $appli . "  !");
     echo $msg_access_problem;
+    exit();
+  }
+  if ($DEV_MOD) {
+    header('Content-Type: text/plain; charset=utf-8;');
+    echo 'header("Location: "' . $url . '", true, 302);';
     exit();
   }
   header('Content-Type: text/html; charset=utf-8;');

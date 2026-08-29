@@ -52,6 +52,8 @@ The private configuration repository is separate from this application repositor
 10. Check optional access filter with `can_access()`.
 11. Redirect with `do_redirect()` or display `$msg_access_problem`.
 
+When `$DEV_MOD=true` and `check_authorized_access()` allows the request IP, the entrypoint enables PHP error display and `do_redirect()` shows the resolved 302 `Location` header instead of redirecting. The mode is inactive for other IPs.
+
 ## Mapping Modes
 
 Two mapping modes exist:

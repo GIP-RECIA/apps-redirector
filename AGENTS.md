@@ -17,6 +17,8 @@ The app cannot run standalone: it needs the external phpCAS library (`$PATH_CAS_
 
 Any change to mapping keys or configuration structure impacts both entrypoints.
 
+`$DEV_MOD=true` is a diagnostic setting for the redirect entrypoint. It is effective only when `check_authorized_access()` allows the request IP; it enables PHP error display and outputs the resolved redirect instead of sending it.
+
 ## Logging
 
 `log_action($lvl, $msg)` (in `commonFunction.php`) appends to the daily file from `$LOG_FILENAME` (default `logs/YYYY-MM-DD.log`; some entrypoints override it with their own prefix). Levels are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` — case-sensitive — and only messages at or above `$LOG_LVL` are written.

@@ -2,6 +2,7 @@
 
 $LOG_LVL="INFO"; // TRACE,DEBUG,INFO,WARN,ERROR sont les valeurs possibles, attention à la CASSE !
 //$LOG_LVL="DEBUG"; // TRACE,DEBUG,INFO,WARN,ERROR sont les valeurs possibles, attention à la CASSE !
+$DEV_MOD=false;
 $PATH_CAS_LIB="/var/www/phpCAS/phpCAS-1.6.2/CAS.php";
 $PATH_CAS_CONFIG="conf/cas.inc.php";
 $LOG_FILENAME = "logs/" . date("Y-m-d") . ".log";
