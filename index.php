@@ -112,7 +112,7 @@ function do_replacement($conf_property,$chaine){
 }
 
 function do_redirect($conf_property,$url) {
-  global $appli, $DEV_MOD, $msg_access_problem;
+  global $appli, $msg_access_problem;
   if (is_null($url) || trim($url) === '' || strtolower(trim($url)) === 'null') {
     log_action("INFO", "Aucune redirection n'est définie pour l'application " . $appli . "  !");
     echo $msg_access_problem;
@@ -125,16 +125,10 @@ function do_redirect($conf_property,$url) {
     echo $msg_access_problem;
     exit();
   }
-  // on vérifie que l'on n'est pas en mod de développement pour s'éviter la redirection
-  if (!$DEV_MOD) {
-    header('Content-Type: text/html; charset=utf-8;');
-    header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
-    header("Location: ".$url, true, 302);
-    exit();
-  } else {
-    echo 'header("Location: "'.$url.')';
-    exit();
-  }
+  header('Content-Type: text/html; charset=utf-8;');
+  header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
+  header("Location: ".$url, true, 302);
+  exit();
 }
 
 function find_default_link($conf_property) {
@@ -310,19 +304,6 @@ if (isset($_REQUEST['logout'])) {
 $CAS_attrs = phpCAS::getAttributes();
 $CAS_user = phpCAS::getUser();
 
-if ($DEV_MOD){
-  log_action("WARN", "Le mode développement est activé !");
-  error_reporting(E_ALL);
-  ini_set('display_errors','On');
-
-  ?>
-  <html>
-  <head>
-  <title>ESCO-Apps-Redirector</title>
-  </head>
-  <body>
-  <?php
-}
 log_action("DEBUG","SessionID (si aucun global logout non fonctionnel) : ".session_id()." et request keys : ".implode(', ', array_keys($_REQUEST)));
 log_action("TRACE","Request values : ".print_r($_REQUEST, true));
 log_action("DEBUG","Successfull Authentication!");
@@ -331,17 +312,6 @@ log_action("INFO","L'utilisateur est correctement authentifié et son uid est : 
 log_action("DEBUG","La version du client phpCAS est : " . phpCAS::getVersion());
 log_action("DEBUG","Les attributs CAS fournis sont : ".implode(', ', array_keys($CAS_attrs)));
 log_action("TRACE","Le tableau des attributs CAS fournis est : ".print_r($CAS_attrs, true));
-if ($DEV_MOD){
-  ?>
-  <h1>Successfull Authentication!</h1>
-  <p><a href="?logout=">Logout</a></p>
-  <p>connexion au serveur cas avec les paramètres suivants :<b><?php echo $protocol.",".$host.":".$port."/".$uri; ?></b></p>
-  <p>the user's login is <b><?php echo phpCAS::getUser(); ?></b>.</p>
-  <p>phpCAS version is <b><?php echo phpCAS::getVersion()."<br>"; print_r(phpCAS::getAttributes());?></b>.</p>
-  <p>attribute  ESCOUAICourant is <?php echo (array_key_exists('ESCOUAICourant',$CAS_attrs)) ? $CAS_attrs['ESCOUAICourant']: "<b>Not provided</b>"; ?></b>.</p>
-  <p>conf proxy <?php print_r($cas_real_hosts); ?></b>.</p>
-  <?php
-}
 $msg_access_problem = '<div style="text-align:center;margin-left: auto;margin-right: auto;">Vous n\'avez pas acc&egrave;s &agrave; ce service !</div>';
 if (isset($_GET['appli']) and $_GET['appli']!="" ){
   log_action("INFO","Le nom de l'application demandée est : ".$_GET['appli']);
@@ -425,11 +395,5 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
 } else {
   log_action("ERROR","Il manque le paramètre définissant l'application en paramètre de l'url d'accès !");
   echo $msg_access_problem;
-}
-if ($DEV_MOD){
-  ?>
-  </body>
-  </html>
-  <?php
 }
 ?>

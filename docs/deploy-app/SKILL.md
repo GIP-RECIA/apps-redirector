@@ -121,9 +121,7 @@ The following paths are excluded from application deployment:
 .git/
 .github/
 conf/conf.inc.php
-conf/conf.inc.test.php
 conf/cas.inc.php
-conf/cas-test.inc.php
 conf/*.bkp.*
 logs/*
 getAllInfos.php
@@ -162,9 +160,7 @@ Typical private files are:
 
 ```text
 conf/conf.inc.php
-conf/conf.inc.test.php
 conf/cas.inc.php
-conf/cas-test.inc.php
 ```
 
 Before changing private configuration files in production, create a timestamped backup as described in `docs/project-context/SKILL.md`.

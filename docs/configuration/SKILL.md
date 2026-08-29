@@ -25,18 +25,6 @@ Example:
 $LOG_LVL='INFO';
 ```
 
-`$DEV_MOD`
-
-Enables development output and prevents real redirects. In dev mode, `do_redirect()` prints the target header instead of sending it.
-
-Use `false` for production.
-
-Example:
-
-```php
-$DEV_MOD=false;
-```
-
 `$PATH_CAS_LIB`
 
 Path to the phpCAS library entry point.

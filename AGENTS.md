@@ -10,22 +10,12 @@ php -l index.php && php -l commonFunction.php
 
 The app cannot run standalone: it needs the external phpCAS library (`$PATH_CAS_LIB` in `conf/conf.inc.php`, e.g. `/var/www/phpCAS/phpCAS-1.6.2/CAS.php`) plus real CAS/conf files that are not in this repo.
 
-## Two entrypoints must stay in sync
+## Entrypoints
 
-- `index.php`: production, loads `conf/conf.inc.php`.
-- `index_test.php`: dev/test, loads `conf/conf.inc.test.php`.
+- `index.php`: production redirect entrypoint, loads `conf/conf.inc.php`.
+- `getConfJson.php`: standalone configuration JSON entrypoint, loads `conf/conf.inc.php`, exposes `$mapping[$appli]` as JSON, and restricts access by IP via `check_authorized_access()`.
 
-They are intentionally near-identical. Validate changes in `index_test.php` first, then apply them to `index.php`. Check sync with:
-
-```bash
-diff <(grep -v "conf.inc" index.php) <(grep -v "conf.inc" index_test.php)
-```
-
-`$DEV_MOD=true` (debug output, no redirects) is allowed only on the test entrypoint, never production.
-
-## Third entrypoint: getConfJson.php
-
-`getConfJson.php` is a standalone web entrypoint: it loads `conf/conf.inc.php` directly (no `_test` twin, not covered by the sync rule above), exposes `$mapping[$appli]` as JSON, and restricts access by IP via `check_authorized_access()`. Any change to mapping keys or config structure impacts `index.php`, `index_test.php`, and `getConfJson.php`.
+Any change to mapping keys or configuration structure impacts both entrypoints.
 
 ## Logging
 
@@ -47,7 +37,7 @@ Any change to mapping keys, redirect resolution order, or configuration syntax m
 
 Examples:
 
-- `REGEX_LINK` support in `index.php`, `index_test.php`, and `getConfJson.php` must exist before `prod/conf.inc.php` uses it.
+- `REGEX_LINK` support in `index.php` and `getConfJson.php` must exist before `prod/conf.inc.php` uses it.
 - Compound `FILTER` rules using `OPERATOR` and `RULES` must be supported here before they are used in private config.
 - Public examples in `conf/conf.inc.example.php` must not include private hostnames, secrets, or establishment data from the config repository.
 

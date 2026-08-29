@@ -2,7 +2,6 @@
 
 // Fichier des associations et des propri&eacute;t&eacute;s
 include_once('conf/conf.inc.php');
-//include_once('conf/conf.inc.test.php');
 $LOG_FILENAME = "logs/getConfJson-" . date("Y-m-d") . ".log";
 
 include_once('commonFunction.php');

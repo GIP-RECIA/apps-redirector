@@ -2,24 +2,13 @@
 
 $LOG_LVL="INFO"; // TRACE,DEBUG,INFO,WARN,ERROR sont les valeurs possibles, attention à la CASSE !
 //$LOG_LVL="DEBUG"; // TRACE,DEBUG,INFO,WARN,ERROR sont les valeurs possibles, attention à la CASSE !
-// passer dev_mod à true affiche certains log dans le HTML et évite d'effectuer les redirections.
-$DEV_MOD=false;
 $PATH_CAS_LIB="/var/www/phpCAS/phpCAS-1.6.2/CAS.php";
 $PATH_CAS_CONFIG="conf/cas.inc.php";
-//$PATH_CAS_CONFIG="conf/cas-test.inc.php";
 $LOG_FILENAME = "logs/" . date("Y-m-d") . ".log";
-//$LOG_FILENAME = "logs/" . date("Y-m-d") . "-test.log";
 $PHPCAS_LOG_FILENAME="logs/phpCAS.log";
 
 $AUTORIZED_IPS=array('127.0.0.1');
 $AUTORIZED_SUBNET=array('192.168.0.');
-
-if ($DEV_MOD){
-  echo "dev_mod";
-  error_reporting(E_ALL);
-  ini_set('display_errors','On');
-}
-print_r($DEV_MOD, true);
 
 /** tableau de mapping des noms, type, etc sous la forme $etab['UAI']['LABEL|TYPE|SITE']='value' **/
 static $mapping = array();

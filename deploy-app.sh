@@ -59,9 +59,7 @@ rsync "${RSYNC_OPTS[@]}" \
   --exclude='.git/' \
   --exclude='.github/' \
   --exclude='conf/conf.inc.php' \
-  --exclude='conf/conf.inc.test.php' \
   --exclude='conf/cas.inc.php' \
-  --exclude='conf/cas-test.inc.php' \
   --exclude='conf/*.bkp.*' \
   --exclude='logs/*' \
   --exclude='getAllInfos.php' \

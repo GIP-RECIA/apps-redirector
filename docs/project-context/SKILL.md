@@ -14,19 +14,13 @@ The application must stay compatible with PHP 7.3 through 8.3 (the local CLI is 
 There is no `index.html`. The main entry points are:
 
 - `index.php`: production entry point, loads `conf/conf.inc.php`.
-- `index_test.php`: dev/test entry point, loads `conf/conf.inc.test.php`.
-
-`index_test.php` is intentionally available to test code changes before reporting validated changes back to `index.php`.
-
 ## Key Files
 
 - `index.php`: production CAS redirect flow.
-- `index_test.php`: test/dev CAS redirect flow.
 - `commonFunction.php`: shared logging and authorized IP/subnet helper.
 - `docs/configuration/SKILL.md`: configuration variables and mapping examples.
 - `docs/deploy-app/SKILL.md`: application deployment script documentation.
 - `conf/conf.inc.example.php`: example app mapping and global settings.
-- `conf/conf.inc.test.example.php`: example test/dev app configuration overlay.
 - `conf/cas.inc.example.php`: example CAS server/session configuration.
 - `deploy-app.sh`: application deployment helper, dry-run by default.
 - `.htaccess`: disables caching and sets PHP session cookie path for Apache/mod_php5.
@@ -44,7 +38,7 @@ The private configuration repository is separate from this application repositor
 
 ## Runtime Flow
 
-`index.php` and `index_test.php` do the following:
+`index.php` does the following:
 
 1. Load app config and CAS config.
 2. Configure PHP session settings.
@@ -102,7 +96,7 @@ This model is used for applications such as `PDFONLINE` and `MYPADS`: the contro
 
 - `can_access($conf_property)`: checks optional `FILTER` configuration against a CAS attribute using a regex.
 - `do_replacement($conf_property, $chaine)`: replaces `%USER_ATTRIBUTE%` placeholder using a CAS attribute value.
-- `do_redirect($conf_property, $url)`: validates the redirect target, applies replacements, checks access, then sends redirect headers unless `$DEV_MOD` is true.
+- `do_redirect($conf_property, $url)`: validates the redirect target, applies replacements, checks access, then sends a 302 redirect.
 - `find_default_link($conf_property)`: resolves an application default URL from `DEFAULT_LINK`.
 - `find_link_override($conf_property)`: resolves an optional application-level `LINK` override before domain mapping.
 - `find_regex_link($conf_property, $user_attr = null)`: resolves an optional application-level `REGEX_LINK` override from configured CAS attributes.
@@ -138,7 +132,6 @@ Application deployment excludes private config files, logs, Git metadata, and Gi
 
 ## Known Issues And Risks
 
-- Debug/dev output prints CAS data without HTML escaping. This is acceptable only if `$DEV_MOD=true` is restricted to the test/dev entry point and never exposed in production.
 - Logging can include full CAS attributes and request values. Be careful with sensitive personal data and log levels.
 - `commonFunction.php` includes `conf/conf.inc.php`, but entry points already include config. `include_once` prevents double inclusion, but the dependency is redundant and production-specific.
 
@@ -158,9 +151,7 @@ Application deployment excludes private config files, logs, Git metadata, and Gi
 The real configuration files are private and ignored by Git:
 
 - `conf/conf.inc.php`
-- `conf/conf.inc.test.php`
 - `conf/cas.inc.php`
-- `conf/cas-test.inc.php`
 
 Do not commit real local values from these files.
 
