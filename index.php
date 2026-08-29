@@ -100,14 +100,18 @@ function match_filter_condition($condition) {
   log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour la condition est : ".$filter_attr);
   if (!array_key_exists($filter_attr, $CAS_attrs)) {
     log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
-    throw new Exception("Le serveur CAS n'a pas retourné l'attribut " . $filter_attr . " souhaité pour le filtre. Les attributs fournis par le serveur CAS sont : " . implode(', ', array_keys($CAS_attrs)));
+    log_action("DEBUG", "Le serveur CAS n'a pas retourné l'attribut " . $filter_attr . " pour le filtre.");
+    return false;
   }
   log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$filter_attr], true));
   $cas_values = is_array($CAS_attrs[$filter_attr]) ? $CAS_attrs[$filter_attr] : array($CAS_attrs[$filter_attr]);
-  $i = 0;
-  while ($i < sizeof($cas_values)) {
-    log_action("TRACE", "Teste l'appartenance de ".$cas_values[$i]);
-    $match = @preg_match($regex, $cas_values[$i]);
+  foreach ($cas_values as $cas_value) {
+    if ($cas_value === null || !is_scalar($cas_value) || trim((string) $cas_value) === '') {
+      log_action("TRACE", "Ignore une valeur CAS vide ou non scalaire pour le filtre.");
+      continue;
+    }
+    log_action("TRACE", "Teste l'appartenance de ".$cas_value);
+    $match = @preg_match($regex, (string) $cas_value);
     if ($match === false) {
       throw new Exception("Expression régulière FILTER invalide : " . $regex);
     }
@@ -116,7 +120,6 @@ function match_filter_condition($condition) {
       return true;
     }
     log_action("DEBUG", "Le test est négatif");
-    $i++;
   }
   return false;
 }

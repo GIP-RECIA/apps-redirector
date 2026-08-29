@@ -255,6 +255,8 @@ CAS attribute checked by the filter.
 
 Regular expression applied to the selected CAS attribute. If the attribute is an array, at least one value must match.
 
+A missing, empty, or non-scalar attribute value makes that filter rule evaluate to `false`. In a compound `OR` rule, evaluation continues with the next rule, allowing a fallback attribute to match. Invalid regular expressions remain configuration errors.
+
 Example:
 
 ```php
