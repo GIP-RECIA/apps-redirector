@@ -96,7 +96,9 @@ This model is used for applications such as `PDFONLINE` and `MYPADS`: the contro
 
 ## Important Functions
 
-- `can_access($conf_property)`: checks optional `FILTER` configuration against a CAS attribute using a regex.
+- `can_access($conf_property)`: checks optional `FILTER` configuration against CAS attributes using regex conditions.
+- `evaluate_filter_rule($rule)`: evaluates historical `FILTER` conditions or compound `AND`/`OR` filter rules.
+- `match_filter_condition($condition)`: checks one `USER_ATTRIBUTE`/`REGEX` filter condition against CAS attributes.
 - `do_replacement($conf_property, $chaine)`: replaces `%USER_ATTRIBUTE%` placeholder using a CAS attribute value.
 - `do_redirect($conf_property, $url)`: validates the redirect target, applies replacements, checks access, then sends a 302 redirect.
 - `find_default_link($conf_property)`: resolves an application default URL from `DEFAULT_LINK`.
@@ -145,6 +147,7 @@ Application deployment excludes private config files, logs, Git metadata, and Gi
 - Empty redirect targets and the literal string `"null"` are treated as no redirect.
 - `do_redirect()` applies `do_replacement()` to all redirect targets before sending the `Location` header.
 - Domain mappings can use application-level `LINK` overrides for establishment-specific exceptions.
+- `FILTER` supports compound `AND`/`OR` rules while preserving the historical `USER_ATTRIBUTE`/`REGEX` form.
 - The unused context-based routing mechanism was removed from code, public examples, documentation, and private production configuration.
 - Deployment scripts now run in dry-run mode by default and require `DRY_RUN=0` for actual copy operations.
 

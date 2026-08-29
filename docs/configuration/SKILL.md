@@ -241,7 +241,7 @@ $mapping['APP_NAME']['LINK']['0000000B']='null';
 
 ## Access Filter
 
-Use `FILTER` to allow redirection only for users whose CAS attribute matches a regex.
+Use `FILTER` to allow redirection only for users whose CAS attributes match configured regex rules.
 
 `FILTER.USER_ATTRIBUTE`
 
@@ -256,6 +256,39 @@ Example:
 ```php
 $mapping['APP_NAME']['FILTER']['USER_ATTRIBUTE']='ENTPersonProfils';
 $mapping['APP_NAME']['FILTER']['REGEX']='/^((National_ENS)|(National_DOC)|(National_ELV))/';
+```
+
+### Compound Filter Rules
+
+To combine several conditions, configure `FILTER` with `OPERATOR` and `RULES`. Supported operators are `AND` and `OR`. Rules can be nested to express parentheses.
+
+Each leaf rule uses the same `USER_ATTRIBUTE`/`REGEX` pair as the historical form. The historical single-condition form remains supported.
+
+Example: access requires a teacher profile AND either a matching UAI or a matching fallback SIREN/SIRET:
+
+```php
+$mapping['APP_NAME']['FILTER']=array(
+  'OPERATOR' => 'AND',
+  'RULES' => array(
+    array(
+      'USER_ATTRIBUTE' => 'ENTPersonProfils',
+      'REGEX'          => '/^National_ENS$/',
+    ),
+    array(
+      'OPERATOR' => 'OR',
+      'RULES' => array(
+        array(
+          'USER_ATTRIBUTE' => 'ESCOUAICourant',
+          'REGEX'          => '/^018[0-9]{4}[A-Z]$/i',
+        ),
+        array(
+          'USER_ATTRIBUTE' => 'ESCOSIRENCourant',
+          'REGEX'          => '/^19180585200081$/',
+        ),
+      ),
+    ),
+  ),
+);
 ```
 
 ## URL Replacement

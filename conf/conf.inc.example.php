@@ -35,6 +35,29 @@ $mapping['APPS_NAME']['REPLACE']['VALUE_TO_LOWERCASE']=true;
 $mapping['APPS_NAME']['FILTER']['USER_ATTRIBUTE']='ENTPersonJointure';
 // regex à appliquer sur la ou les valeurs de l'attribut fourni par le CAS afin de déterminer si l'utilisateur à le droit d'accès.
 $mapping['APPS_NAME']['FILTER']['REGEX']='A REGEX';
+//définition alternative d'un filtre composé avec des opérateurs AND/OR.
+$mapping['APPS_NAME_WITH_COMPLEX_FILTER']['FILTER']=array(
+  'OPERATOR' => 'AND',
+  'RULES' => array(
+    array(
+      'USER_ATTRIBUTE' => 'ENTPersonProfils',
+      'REGEX' => '/^National_ENS$/',
+    ),
+    array(
+      'OPERATOR' => 'OR',
+      'RULES' => array(
+        array(
+          'USER_ATTRIBUTE' => 'ESCOUAICourant',
+          'REGEX' => '/^018[0-9]{4}[A-Z]$/i',
+        ),
+        array(
+          'USER_ATTRIBUTE' => 'ESCOSIRENCourant',
+          'REGEX' => '/^19180585200081$/',
+        ),
+      ),
+    ),
+  ),
+);
 //définition alternative d'un mapping par domaine. DOMAIN est la valeur courante à tester, DOMAIN_MAP contient les associations domaine/url.
 $mapping['APPS_NAME_BY_DOMAIN']['DOMAIN']=$_SERVER['SERVER_NAME'];
 $mapping['APPS_NAME_BY_DOMAIN']['DEFAULT_LINK']='http://A_DEFAULT_URL';

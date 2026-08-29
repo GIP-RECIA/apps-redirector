@@ -33,55 +33,92 @@ if ($DEV_MOD) {
 }
 
 function can_access($conf_property){
-  global $CAS_attrs,$msg_access_problem;
+  global $msg_access_problem;
   // Vérifie s'il y a un filtre d'accés
   if (! array_key_exists('FILTER',$conf_property)) {
     return true;
-  } else if (array_key_exists('FILTER',$conf_property) and array_key_exists('USER_ATTRIBUTE', $conf_property['FILTER']) and array_key_exists('REGEX', $conf_property['FILTER'])) {
-    $filter_attr=$conf_property['FILTER']['USER_ATTRIBUTE'];
-    $regex=$conf_property['FILTER']['REGEX'];
-    log_action("TRACE", "Un filtre sur l'accès est défini et les proriétées USER_ATTRIBUTE et REGEX sont définies.");
-    log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour le filtre avec le lien est : ".$filter_attr);
-    log_action("TRACE", "Le tableau des propriétés du filtre est : ".print_r($conf_property['FILTER'], true));
-    if (array_key_exists($filter_attr, $CAS_attrs)){
-      log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$filter_attr], true));
-      log_action("TRACE", "L'attribut utilisateur nécessaire au filtre est fourni par le serveur CAS.");
-      if (!is_array($CAS_attrs[$filter_attr])){
-        if (preg_match($regex, $CAS_attrs[$filter_attr])){
-          log_action("DEBUG", "Le test du filtre est positif");
-          return true;
-        }
-        log_action("INFO", "Le filtre interdit l'accès à l'utilisateur !");
-        return false;
-      }
-      $found=false;
-      $i=0;
-      log_action("TRACE", "Nous sommes dans le cas d'un tableau de valeurs retournées pas le CAS");
-      log_action("TRACE", "Liste des valeurs CAS à tester : ".print_r($CAS_attrs[$filter_attr], true));
-      while (!$found and $i < sizeof($CAS_attrs[$filter_attr])){
-        $current_CAS_attr=$CAS_attrs[$filter_attr][$i];
-        log_action("TRACE", "Teste l'appartenance de ".$current_CAS_attr);
-        if (preg_match($regex, $current_CAS_attr)) {
-          $found = true;
-          log_action("DEBUG", "Le teste est positif");
-        } else {
-          log_action("DEBUG", "Le test est négatif");
-        }
-        $i++;
-      }
-      if (!$found){
-        log_action("INFO", "Le filtre interdit l'accès à l'utilisateur !");
-      }
-      return $found;
+  }
+  try {
+    if (evaluate_filter_rule($conf_property['FILTER'])) {
+      log_action("DEBUG", "Le test du filtre est positif");
+      return true;
     }
-    log_action("ERROR", "Le serveur CAS n'a pas retourné l'attribut " . $filter_attr . " souhaité pour le filtre. Les attributs fournis par le serveur CAS sont : " . implode(', ', array_keys($CAS_attrs)));
-    log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
+    log_action("INFO", "Le filtre interdit l'accès à l'utilisateur !");
+    return false;
+  } catch (Throwable $e) {
+    log_action("ERROR", $e->getMessage());
     echo $msg_access_problem;
     exit();
   }
-  log_action("ERROR", "Un filtre a été défini mais celui-ci n'est pas correctement configuré avec les attributs USER_ATTRIBUTE et REGEX.");
-  echo $msg_access_problem;
-  exit();
+}
+
+function evaluate_filter_rule($rule) {
+  if (!is_array($rule)) {
+    throw new Exception("Un filtre a été défini mais celui-ci n'est pas correctement configuré.");
+  }
+  if (array_key_exists('USER_ATTRIBUTE', $rule) and array_key_exists('REGEX', $rule)) {
+    return match_filter_condition($rule);
+  }
+  if (!array_key_exists('OPERATOR', $rule) or !array_key_exists('RULES', $rule) or !is_array($rule['RULES'])) {
+    throw new Exception("Un filtre composé doit définir les propriétés OPERATOR et RULES.");
+  }
+  if (!is_string($rule['OPERATOR'])) {
+    throw new Exception("L'opérateur du filtre composé doit être une chaîne.");
+  }
+  $operator = strtoupper($rule['OPERATOR']);
+  if ($operator !== 'AND' and $operator !== 'OR') {
+    throw new Exception("L'opérateur de filtre " . $rule['OPERATOR'] . " n'est pas supporté.");
+  }
+  if (empty($rule['RULES'])) {
+    throw new Exception("Un filtre composé doit contenir au moins une règle.");
+  }
+  $i = 0;
+  while ($i < sizeof($rule['RULES'])) {
+    $match = evaluate_filter_rule($rule['RULES'][$i]);
+    if ($operator === 'AND' and !$match) {
+      return false;
+    }
+    if ($operator === 'OR' and $match) {
+      return true;
+    }
+    $i++;
+  }
+  return $operator === 'AND';
+}
+
+function match_filter_condition($condition) {
+  global $CAS_attrs;
+  $filter_attr = $condition['USER_ATTRIBUTE'];
+  $regex = $condition['REGEX'];
+  if (!is_string($filter_attr) || !is_string($regex)) {
+    throw new Exception("Les propriétés USER_ATTRIBUTE et REGEX du filtre doivent être des chaînes.");
+  }
+  if (!is_array($CAS_attrs)) {
+    throw new Exception("Le serveur CAS n'a pas retourné d'attributs exploitables pour le filtre.");
+  }
+  log_action("TRACE", "Le tableau de la condition de filtre est : ".print_r($condition, true));
+  log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour la condition est : ".$filter_attr);
+  if (!array_key_exists($filter_attr, $CAS_attrs)) {
+    log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
+    throw new Exception("Le serveur CAS n'a pas retourné l'attribut " . $filter_attr . " souhaité pour le filtre. Les attributs fournis par le serveur CAS sont : " . implode(', ', array_keys($CAS_attrs)));
+  }
+  log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$filter_attr], true));
+  $cas_values = is_array($CAS_attrs[$filter_attr]) ? $CAS_attrs[$filter_attr] : array($CAS_attrs[$filter_attr]);
+  $i = 0;
+  while ($i < sizeof($cas_values)) {
+    log_action("TRACE", "Teste l'appartenance de ".$cas_values[$i]);
+    $match = @preg_match($regex, $cas_values[$i]);
+    if ($match === false) {
+      throw new Exception("Expression régulière FILTER invalide : " . $regex);
+    }
+    if ($match === 1) {
+      log_action("DEBUG", "Le test est positif");
+      return true;
+    }
+    log_action("DEBUG", "Le test est négatif");
+    $i++;
+  }
+  return false;
 }
 
 function do_replacement($conf_property,$chaine){
