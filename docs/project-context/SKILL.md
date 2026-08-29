@@ -68,6 +68,10 @@ Attribute mapping can use `USER_ATTRIBUTE_FALLBACK` if the main attribute does n
 
 Domain mapping can also use application-level `LINK` entries as establishment overrides before falling back to `DOMAIN_MAP`.
 
+Both mapping modes can use `REGEX_LINK` to route by regular expression on `USER_ATTRIBUTE` values, with optional `USER_ATTRIBUTE_FALLBACK` support. Exact `LINK` entries remain higher priority than regex entries.
+
+When `REGEX_LINK` targets `ESCOUAICourant` and a fallback such as `ESCOSIRENCourant` is configured, regexes must be strict enough to match only UAI values, for example `/^018[0-9]{4}[A-Z]$/i` instead of `/^018/`. `REGEX_LINK` does not normalize CAS values before matching, so use the `i` modifier when UAI casing should be ignored.
+
 `DEFAULT_LINK` can be used as a fallback in supported branches.
 
 The previous global `$context` and `CONTEXT_DEFAULT_LINK` mechanism was removed because it is not used in production. Use domain mapping plus application-level `LINK` overrides instead.
@@ -77,16 +81,19 @@ The previous global `$context` and `CONTEXT_DEFAULT_LINK` mechanism was removed 
 For CAS attribute mappings, the resolution order is:
 
 1. Match `USER_ATTRIBUTE` against application `LINK`.
-2. If needed, match `USER_ATTRIBUTE_FALLBACK` against application `LINK`.
-3. Use application `DEFAULT_LINK` when configured.
-4. Show the standard access problem message.
+2. Match `USER_ATTRIBUTE` against application `REGEX_LINK`.
+3. If needed, match `USER_ATTRIBUTE_FALLBACK` against application `LINK`.
+4. If needed, match `USER_ATTRIBUTE_FALLBACK` against application `REGEX_LINK`.
+5. Use application `DEFAULT_LINK` when configured.
+6. Show the standard access problem message.
 
 For domain mappings, the resolution order is:
 
 1. Match application-level `LINK` overrides when `USER_ATTRIBUTE` or `USER_ATTRIBUTE_FALLBACK` are configured.
-2. Match the current `DOMAIN` value against application `DOMAIN_MAP`.
-3. Use application `DEFAULT_LINK` when configured.
-4. Show the standard access problem message.
+2. Match application-level `REGEX_LINK` overrides when `USER_ATTRIBUTE` or `USER_ATTRIBUTE_FALLBACK` are configured.
+3. Match the current `DOMAIN` value against application `DOMAIN_MAP`.
+4. Use application `DEFAULT_LINK` when configured.
+5. Show the standard access problem message.
 
 This model is used for applications such as `PDFONLINE` and `MYPADS`: the controlled request domain provides the default routing, while establishment-level `LINK` entries handle explicit exceptions such as agricultural structures.
 
@@ -97,6 +104,7 @@ This model is used for applications such as `PDFONLINE` and `MYPADS`: the contro
 - `do_redirect($conf_property, $url)`: validates the redirect target, applies replacements, checks access, then sends redirect headers unless `$DEV_MOD` is true.
 - `find_default_link($conf_property)`: resolves an application default URL from `DEFAULT_LINK`.
 - `find_link_override($conf_property)`: resolves an optional application-level `LINK` override before domain mapping.
+- `find_regex_link($conf_property, $user_attr = null)`: resolves an optional application-level `REGEX_LINK` override from configured CAS attributes.
 - `find_cas_attr($user_attr, $appli)`: finds a redirect URL from the configured CAS attribute value.
 
 ## Configuration Rules
@@ -108,6 +116,7 @@ Keep generic application defaults near the application declaration:
 - `DOMAIN_MAP`
 - `USER_ATTRIBUTE`
 - `USER_ATTRIBUTE_FALLBACK`
+- `REGEX_LINK`
 - empty `LINK` initialization
 
 Keep establishment-specific `LINK` overrides in the establishment sections with the other per-establishment application mappings. This keeps generic behavior separate from structure-specific exceptions.

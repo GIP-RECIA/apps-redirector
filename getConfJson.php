@@ -10,11 +10,18 @@ include_once('commonFunction.php');
 function confForApp($conf, $etab, $appli) {
   $tab = array();
   if (array_key_exists($appli,$conf)) {
-    $tab["DEFAULT"] = $conf[$appli]['DEFAULT_LINK'];
-    foreach ($conf[$appli]['LINK'] as $key => $value) {
-      //log_action("Key :".print_r($key, true));
-      //log_action("Value :".print_r($value, true));
-      $tab[$key] = $value;
+    if (array_key_exists('DEFAULT_LINK', $conf[$appli])) {
+      $tab["DEFAULT"] = $conf[$appli]['DEFAULT_LINK'];
+    }
+    if (array_key_exists('REGEX_LINK', $conf[$appli]) && is_array($conf[$appli]['REGEX_LINK'])) {
+      $tab["REGEX_LINK"] = $conf[$appli]['REGEX_LINK'];
+    }
+    if (array_key_exists('LINK', $conf[$appli]) && is_array($conf[$appli]['LINK'])) {
+      foreach ($conf[$appli]['LINK'] as $key => $value) {
+        //log_action("Key :".print_r($key, true));
+        //log_action("Value :".print_r($value, true));
+        $tab[$key] = $value;
+      }
     }
     ksort($tab);
   }

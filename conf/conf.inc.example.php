@@ -33,6 +33,8 @@ $mapping['APPS_NAME']['USER_ATTRIBUTE']='ENTPersonProfils';
 $mapping['APPS_NAME']['LINK']['PROFIL_1']='http://AN_URL';
 //définition facultative d'un lien par défaut si aucun lien spécifique n'est trouvé.
 $mapping['APPS_NAME']['DEFAULT_LINK']='http://A_DEFAULT_URL';
+//définition facultative de liens par expressions régulières, testés après LINK et avant DEFAULT_LINK.
+$mapping['APPS_NAME']['REGEX_LINK']['/^PROFIL_/']='http://A_REGEX_URL';
 //une chaîne vide ou la valeur 'null' indique qu'aucune redirection ne doit être effectuée.
 $mapping['APPS_NAME']['LINK']['PROFIL_WITHOUT_REDIRECT']='null';
 //définition facultative d'un remplacement de variable dans toutes les urls de redirection.
@@ -52,6 +54,7 @@ $mapping['APPS_NAME_BY_DOMAIN']['DOMAIN_MAP']['domain.example.org']='http://AN_U
 $mapping['APPS_NAME_BY_DOMAIN']['USER_ATTRIBUTE']='ESCOUAICourant';
 $mapping['APPS_NAME_BY_DOMAIN']['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
 $mapping['APPS_NAME_BY_DOMAIN']['LINK']['UAI_WITH_SPECIFIC_URL']='http://A_SPECIFIC_URL';
+$mapping['APPS_NAME_BY_DOMAIN']['REGEX_LINK']['/^018[0-9]{4}[A-Z]$/i']='http://A_DEPARTMENT_URL';
 */
 
 /*

@@ -1,6 +1,6 @@
 ---
 name: configuration
-description: Configuration variables and mapping examples for esco-apps-redirector. Use when editing conf files, application mappings, DOMAIN_MAP, USER_ATTRIBUTE, DEFAULT_LINK, LINK overrides, or access FILTERs.
+description: Configuration variables and mapping examples for esco-apps-redirector. Use when editing conf files, application mappings, DOMAIN_MAP, USER_ATTRIBUTE, DEFAULT_LINK, LINK overrides, REGEX_LINK overrides, or access FILTERs.
 ---
 
 # Configuration
@@ -169,6 +169,30 @@ $mapping['APP_NAME']['LINK']['National_ENS']='https://staff.example.org';
 
 If the CAS attribute is an array, the first matching key in `LINK` wins. Put the highest priority values first in the configuration.
 
+`REGEX_LINK`
+
+Optional map of regular expressions to target URLs. It is evaluated after exact `LINK` matches and before `DEFAULT_LINK`. For domain-based mappings, it is evaluated before `DOMAIN_MAP`.
+
+The regex is applied to `USER_ATTRIBUTE`; if no URL is found and `USER_ATTRIBUTE_FALLBACK` is configured, the fallback attribute is tested too. If the CAS attribute is an array, the first matching regex in `REGEX_LINK` wins.
+
+Example:
+
+```php
+$mapping['APP_NAME']['USER_ATTRIBUTE']='ESCOUAICourant';
+$mapping['APP_NAME']['LINK']=array();
+$mapping['APP_NAME']['REGEX_LINK']=array();
+$mapping['APP_NAME']['REGEX_LINK']['/^018[0-9]{4}[A-Z]$/i']='https://service-18.example.org';
+$mapping['APP_NAME']['REGEX_LINK']['/^028[0-9]{4}[A-Z]$/i']='https://service-28.example.org';
+```
+
+For `ESCOUAICourant`, use fully anchored regexes that enforce the UAI format: 7 digits followed by one letter. A department rule such as `018` should therefore use `/^018[0-9]{4}[A-Z]$/i` rather than `/^018/`. The `i` modifier avoids casing issues on the final letter because `REGEX_LINK` does not normalize CAS values before matching. This strict format is required when `USER_ATTRIBUTE_FALLBACK` is also configured, otherwise a loose regex could accidentally match fallback values such as `ESCOSIRENCourant`.
+
+Exact `LINK` entries remain useful for exceptions:
+
+```php
+$mapping['APP_NAME']['LINK']['0180847Y']='https://specific-school.example.org';
+```
+
 ## Fallback Attribute
 
 `USER_ATTRIBUTE_FALLBACK`
@@ -198,15 +222,17 @@ $mapping['APP_NAME']['DEFAULT_LINK']='https://default.example.org';
 For attribute-based mappings, the redirect resolution order is:
 
 1. explicit `LINK` match for the application
-2. application `DEFAULT_LINK`
-3. standard access problem message
+2. `REGEX_LINK` match for the application
+3. application `DEFAULT_LINK`
+4. standard access problem message
 
 For domain-based mappings, the redirect resolution order is:
 
 1. explicit `LINK` match for the application, when `USER_ATTRIBUTE`/`USER_ATTRIBUTE_FALLBACK` and `LINK` are also configured
-2. `DOMAIN_MAP` match for the current domain
-3. application `DEFAULT_LINK`
-4. standard access problem message
+2. `REGEX_LINK` match for the application, when `USER_ATTRIBUTE`/`USER_ATTRIBUTE_FALLBACK` are configured
+3. `DOMAIN_MAP` match for the current domain
+4. application `DEFAULT_LINK`
+5. standard access problem message
 
 The redirector treats these values as no redirect target:
 
@@ -306,7 +332,7 @@ In short:
 
 This is similar to `USER_ATTRIBUTE` and `LINK`, but the selected value comes from the request domain instead of CAS attributes.
 
-If the application also defines `USER_ATTRIBUTE`, `USER_ATTRIBUTE_FALLBACK`, and `LINK`, `LINK` is checked first. This allows an application to use domain routing as the normal behavior and keep explicit establishment overrides for exceptions.
+If the application also defines `USER_ATTRIBUTE`, `USER_ATTRIBUTE_FALLBACK`, `LINK`, or `REGEX_LINK`, attribute-based overrides are checked first. This allows an application to use domain routing as the normal behavior and keep explicit establishment overrides for exceptions.
 
 Example:
 
@@ -380,10 +406,25 @@ $mapping['DOMAIN_OVERRIDE_APP']['USER_ATTRIBUTE']='ESCOUAICourant';
 $mapping['DOMAIN_OVERRIDE_APP']['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
 $mapping['DOMAIN_OVERRIDE_APP']['LINK']=array();
 $mapping['DOMAIN_OVERRIDE_APP']['LINK']['0000000A']='https://specific-school.example.org';
+$mapping['DOMAIN_OVERRIDE_APP']['REGEX_LINK']=array();
+$mapping['DOMAIN_OVERRIDE_APP']['REGEX_LINK']['/^000[0-9]{4}[A-Z]$/i']='https://regex-school.example.org';
 $mapping['DOMAIN_OVERRIDE_APP']['DOMAIN_MAP']=array();
 $mapping['DOMAIN_OVERRIDE_APP']['DOMAIN_MAP']['site-a.example.org']='https://service-a.example.org';
 $mapping['DOMAIN_OVERRIDE_APP']['DOMAIN_MAP']['site-b.example.org']='https://service-b.example.org';
 $mapping['DOMAIN_OVERRIDE_APP']['DEFAULT_LINK']='https://default.example.org';
+```
+
+### Mapping By Establishment Prefix
+
+```php
+$mapping['PREFIX_APP']['USER_ATTRIBUTE']='ESCOUAICourant';
+$mapping['PREFIX_APP']['DEFAULT_LINK']='https://default.example.org';
+$mapping['PREFIX_APP']['LINK']=array();
+$mapping['PREFIX_APP']['LINK']['0180847Y']='https://specific-school.example.org';
+$mapping['PREFIX_APP']['REGEX_LINK']=array();
+$mapping['PREFIX_APP']['REGEX_LINK']['/^018[0-9]{4}[A-Z]$/i']='https://department-18.example.org';
+$mapping['PREFIX_APP']['REGEX_LINK']['/^028[0-9]{4}[A-Z]$/i']='https://department-28.example.org';
+$mapping['PREFIX_APP']['REGEX_LINK']['/^036[0-9]{4}[A-Z]$/i']='https://department-36.example.org';
 ```
 
 ### Mapping With Access Filter

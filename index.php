@@ -177,6 +177,47 @@ function find_link_override($conf_property) {
   }
 }
 
+function find_regex_link($conf_property, $user_attr = null) {
+  global $CAS_attrs;
+  if (!array_key_exists('REGEX_LINK', $conf_property) || !is_array($conf_property['REGEX_LINK'])) {
+    return;
+  }
+  $regex_attrs = array();
+  if (!is_null($user_attr)) {
+    $regex_attrs[] = $user_attr;
+  } else {
+    if (array_key_exists('USER_ATTRIBUTE', $conf_property)) {
+      $regex_attrs[] = $conf_property['USER_ATTRIBUTE'];
+    }
+    if (array_key_exists('USER_ATTRIBUTE_FALLBACK', $conf_property)) {
+      $regex_attrs[] = $conf_property['USER_ATTRIBUTE_FALLBACK'];
+    }
+  }
+  $j = 0;
+  while ($j < sizeof($regex_attrs)) {
+    $regex_attr = $regex_attrs[$j];
+    if (array_key_exists($regex_attr, $CAS_attrs)) {
+      $cas_values = is_array($CAS_attrs[$regex_attr]) ? $CAS_attrs[$regex_attr] : array($CAS_attrs[$regex_attr]);
+      foreach ($conf_property['REGEX_LINK'] as $regex => $link) {
+        $i = 0;
+        while ($i < sizeof($cas_values)) {
+          $match = @preg_match($regex, $cas_values[$i]);
+          if ($match === false) {
+            log_action("ERROR", "Expression régulière REGEX_LINK invalide : " . $regex);
+            throw new Exception("Configuration error !");
+          }
+          if ($match === 1) {
+            log_action("DEBUG", "REGEX_LINK " . $regex . " correspond à l'attribut " . $regex_attr . ".");
+            return $link;
+          }
+          $i++;
+        }
+      }
+    }
+    $j++;
+  }
+}
+
 /**
 * Retourn l'url de redirection si OK, null si attribut utilisateur non existant et throw exception si pas de droits d'accès
 */
@@ -208,12 +249,14 @@ function find_cas_attr($user_attr, $appli) {
         $i++;
       }
       if (! $found){
-        log_action("ERROR", "Les valeurs des propriétées définies pour l'application " . $appli . " n'ont pas été trouvées parmis celles fournies par le serveur CAS pour l'attribut " . $user_attr . " de l'utilisateur " . phpCAS::getUser() ." !");
+        log_action("DEBUG", "Aucun LINK exact n'a été trouvé pour l'application " . $appli . " et l'attribut CAS " . $user_attr . ".");
         log_action("TRACE", "La valeur ou le tableau de valeurs pour l'attribut CAS utilisé est : ".print_r($CAS_attrs[$user_attr], true));
-        return;
       } else {
         return $mapping[$appli]['LINK'][$cas_attr];
       }
+    }
+    if (!is_null($regex_link = find_regex_link($mapping[$appli], $user_attr))) {
+      return $regex_link;
     } else if (!is_null($default_link = find_default_link($mapping[$appli]))) {
       // Cas où rien n'a été trouvé en fonction de l'attribut utilisateur, dans ce cas on prend la valeur par défaut si celle-ci est définie.
       return $default_link;
@@ -313,6 +356,9 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
         $current_domain = $mapping[$appli]['DOMAIN'];
         $redirect_rslt = find_link_override($mapping[$appli]);
         if (is_null($redirect_rslt)) {
+          $redirect_rslt = find_regex_link($mapping[$appli]);
+        }
+        if (is_null($redirect_rslt)) {
           $redirect_rslt = array_key_exists($current_domain, $mapping[$appli]['DOMAIN_MAP']) ? $mapping[$appli]['DOMAIN_MAP'][$current_domain] : null;
         }
         $default_redirect = array_key_exists('DEFAULT_LINK', $mapping[$appli]) ? $mapping[$appli]['DEFAULT_LINK'] : null;
@@ -332,7 +378,7 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
         log_action("DEBUG", "Aucune url de redirection n'a été trouvée.");
         echo $msg_access_problem;
       } catch (Exception $e) {
-          echo $msg_access_problem;
+        echo $msg_access_problem;
       }
     } else if (array_key_exists('USER_ATTRIBUTE',$mapping[$appli]) && array_key_exists('LINK',$mapping[$appli])) {
       log_action("DEBUG", "Cas de configuration sur le mapping attribut utilisateur");
