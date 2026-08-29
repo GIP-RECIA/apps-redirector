@@ -14,6 +14,7 @@ The application must stay compatible with PHP 7.3 through 8.3 (the local CLI is 
 There is no `index.html`. The main entry points are:
 
 - `index.php`: production entry point, loads `conf/conf.inc.php`.
+
 ## Key Files
 
 - `index.php`: production CAS redirect flow.
@@ -124,6 +125,19 @@ Treat empty strings and the literal string `null` as intentional no-redirect val
 
 Real configuration must stay out of the application repository. Use `conf/conf.inc.example.php` only as a public template.
 
+## Coordination With Config Repository
+
+The real configuration lives in `../esco-apps-redirector-conf`. Changes here must stay compatible with that repository.
+
+When changing mapping behavior or adding configuration keys, update and verify both sides:
+
+- Application implementation in `index.php` and `getConfJson.php` when relevant.
+- Public examples in `conf/conf.inc.example.php`.
+- Application skills in `docs/configuration/SKILL.md` and `docs/project-context/SKILL.md`.
+- Private config skills in `../esco-apps-redirector-conf/docs/configuration/SKILL.md` and `../esco-apps-redirector-conf/docs/project-context/SKILL.md`.
+
+Do not use a new key in `../esco-apps-redirector-conf/prod/conf.inc.php` until the deployed application supports it.
+
 ## Deployment
 
 Application deployment is handled by `deploy-app.sh` from the application repository.
@@ -148,6 +162,7 @@ Application deployment excludes private config files, logs, Git metadata, and Gi
 - `do_redirect()` applies `do_replacement()` to all redirect targets before sending the `Location` header.
 - Domain mappings can use application-level `LINK` overrides for establishment-specific exceptions.
 - `FILTER` supports compound `AND`/`OR` rules while preserving the historical `USER_ATTRIBUTE`/`REGEX` form.
+- `REGEX_LINK` supports regex-based redirect links while preserving exact `LINK` priority.
 - The unused context-based routing mechanism was removed from code, public examples, documentation, and private production configuration.
 - Deployment scripts now run in dry-run mode by default and require `DRY_RUN=0` for actual copy operations.
 

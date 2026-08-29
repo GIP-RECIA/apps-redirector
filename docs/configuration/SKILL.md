@@ -9,6 +9,8 @@ This document describes the main configuration variables used by ESCO Apps Redir
 
 Real configuration files are private and must not be committed. Use the `*.example.php` files as templates.
 
+Real deployed configuration is maintained in `../esco-apps-redirector-conf`. When adding a configuration key or changing resolution behavior, update that repository's human-readable skills too and confirm the private configuration only uses features supported by deployed application code.
+
 ## Global Variables
 
 `$LOG_LVL`
@@ -138,6 +140,8 @@ The application name is selected from the URL:
 ```text
 /esco-apps-redirector/index.php?appli=APP_NAME
 ```
+
+Public examples in this repository must remain generic. Do not copy private hostnames, secrets, or establishment-specific data from `../esco-apps-redirector-conf` into this repository unless they are explicitly intended as public examples.
 
 ## Attribute-Based Mapping
 
