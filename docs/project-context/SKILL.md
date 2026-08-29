@@ -35,8 +35,9 @@ There is no `index.html`. The main entry points are:
 The private configuration repository is separate from this application repository:
 
 - `/home/jgribonvald/Travail/www/esco-apps-redirector-conf`: private configuration repository.
+- `../esco-apps-redirector-conf`: relative path from this application repository.
 - `deploy-conf.sh`: private configuration deployment helper, dry-run by default.
-- `docs/DEPLOY_CONF.md`: private configuration deployment documentation.
+- `../esco-apps-redirector-conf/docs/<skill>/SKILL.md`: private configuration human-readable skills.
 - `prod/conf.inc.php`: production private configuration.
 - `test/`: test private configuration files.
 - `etablissements_uai.csv`: establishment reference file used to compare structures and contexts.
