@@ -64,6 +64,33 @@ When changing mapping behavior, update human-readable skills in both repositorie
 
 PHP 8.3 is the minimum supported version, and the GitHub Actions workflow runs on PHP 8.3 plus `latest`. Before using newer syntax/APIs (`match`, named args, union types, nullsafe operator, `str_contains()`, constructor promotion, enums, readonly properties...), keep the code valid on PHP 8.3.
 
+## Couverture de tests
+
+- **`tests/resolution.php`** : 38 assertions unitaires couvrant la résolution de redirection (LINK, REGEX_LINK, fallback, DEFAULT_LINK, DOMAIN_MAP, filtres, REPLACE, attributs exclus, tableaux CAS). Exécutable localement : `php tests/resolution.php`.
+
+- **`tests/index-integration.php`** : 24 assertions d’intégration par sous-processus, testant le vrai `index.php` avec `REDIRECTOR_CONFIG=ci/conf/conf.inc.php` et un faux client phpCAS. Scénarios couverts :
+  * `LINK` exact prioritaire sur REGEX_LINK
+  * `REGEX_LINK`
+  * fallback après attribut principal absent
+  * `DEFAULT_LINK` sans fallback (exception)
+  * overrides domaine LINK / REGEX_LINK
+  * `DOMAIN_MAP` domaine connu / inconnu
+  * `DEFAULT_LINK` domaine inconnu
+  * filtre refusé
+  * application inconnue / absente
+  Exécutable localement : `php tests/index-integration.php`.
+
+- **`tests/http-index.php`** : 8 assertions HTTP via serveur PHP intégré (`php -S`), vérifiant les codes d’état et le HTML généré sans dépendre de JS externe.
+  * `403` + page d’erreur “Accès refusé” (aucun attribut CAS)
+  * `302` + `Location` vers cible LINK exacte
+  * `302` + `Location` vers cible fallback
+  * `403` + page d’erreur quand aucun attribut principal n’est fourni
+  Exécutable localement : `php tests/http-index.php`.
+
+Toutes les suites passent sur la branche courante.
+
+PHP 8.3 is the minimum supported version, and the GitHub Actions workflow runs on PHP 8.3 plus `latest`. Before using newer syntax/APIs (`match`, named args, union types, nullsafe operator, `str_contains()`, constructor promotion, enums, readonly properties...), keep the code valid on PHP 8.3.
+
 ## Deployment
 
 - App code: `./deploy-app.sh [DEST_DIR]` is dry-run by default; `DRY_RUN=0` performs a real rsync (with automatic destination backup). See `docs/deploy-app/SKILL.md`.
