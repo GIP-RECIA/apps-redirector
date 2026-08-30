@@ -150,6 +150,24 @@ assert_http_scenario(
     null
 );
 
+assert_http_scenario(
+    'Fallback réel',
+    array('REDIRECTOR_DEV_MOD' => '0', 'CI_CAS_ATTRIBUTES' => json_encode(array('TestFallbackIdentifier' => '19999999999999'))),
+    '/index.php?appli=TEST_ROUTING',
+    302,
+    'https://redirector.test/target-a',
+    null
+);
+
+assert_http_scenario(
+    'Aucun attribut principal',
+    array('REDIRECTOR_DEV_MOD' => '0', 'CI_CAS_ATTRIBUTES' => '{}'),
+    '/index.php?appli=TEST_ROUTING',
+    403,
+    null,
+    'Vous n\'avez pas acc&egrave;s &agrave; ce service !'
+);
+
 if ($fails === 0) {
     print "Tests HTTP index: OK ($tests assertions)\n";
     exit(0);
