@@ -9,23 +9,16 @@
 
 function can_access($conf_property)
 {
-    global $msg_access_problem;
     // Vérifie s'il y a un filtre d'accés
     if (! array_key_exists('FILTER', $conf_property)) {
         return true;
     }
-    try {
-        if (evaluate_filter_rule($conf_property['FILTER'])) {
-            log_action("DEBUG", "Le test du filtre est positif");
-            return true;
-        }
-        log_action("INFO", "Le filtre interdit l'accès à l'utilisateur !");
-        return false;
-    } catch (Throwable $e) {
-        log_action("ERROR", $e->getMessage());
-        echo $msg_access_problem;
-        exit();
+    if (evaluate_filter_rule($conf_property['FILTER'])) {
+        log_action("DEBUG", "Le test du filtre est positif");
+        return true;
     }
+    log_action("INFO", "Le filtre interdit l'accès à l'utilisateur !");
+    return false;
 }
 
 function evaluate_filter_rule($rule)
@@ -104,7 +97,7 @@ function match_filter_condition($condition)
 
 function do_replacement($conf_property, $chaine)
 {
-    global $CAS_attrs, $msg_access_problem;
+    global $CAS_attrs;
     // vérifie s'il y a des remplacements à réaliser
     if (! array_key_exists('REPLACE', $conf_property)) {
         return $chaine;
@@ -124,43 +117,37 @@ function do_replacement($conf_property, $chaine)
             $i = 0;
             log_action("ERROR", "Remplacement d'une chaîne par rapport à un attribut CAS contenant plusieurs valeurs pour l'attribut " . $replacement_attr . " !");
             log_action("TRACE", "Liste des valeurs CAS retournées : " . print_r($CAS_attrs[$replacement_attr], true));
-            echo $msg_access_problem;
-            exit();
+            throw new Exception("L'attribut " . $replacement_attr . " contient plusieurs valeurs et ne peut pas être utilisé pour le remplacement.");
         }
         log_action("ERROR", "Le serveur CAS n'a pas retourné l'attribut " . $replacement_attr . " souhaité pour le remplacement. Les attributs fournis par le serveur CAS sont : " . implode(', ', array_keys($CAS_attrs)));
         log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
-        echo $msg_access_problem;
-        exit();
+        throw new Exception("Le serveur CAS n'a pas retourné l'attribut " . $replacement_attr . " nécessaire au remplacement.");
     }
     log_action("ERROR", "Une chaîne de remplacement a été définie mais celle-ci n'est pas correctement configurée avec l'attributs USER_ATTRIBUTE");
-    echo $msg_access_problem;
-    exit();
+    throw new Exception("La règle REPLACE est incomplète.");
 }
 
 function do_redirect($conf_property, $url)
 {
-    global $appli, $DEV_MOD, $msg_access_problem;
+    global $appli, $DEV_MOD;
     if (is_null($url) || trim($url) === '' || strtolower(trim($url)) === 'null') {
         log_action("INFO", "Aucune redirection n'est définie pour l'application " . $appli . "  !");
-        echo $msg_access_problem;
-        exit();
+        throw new Exception("Aucune redirection n'est définie pour l'application " . $appli . ".");
     }
     $url = do_replacement($conf_property, $url);
     log_action("INFO", "Le lien vers lequel rediriger l'utilisateur est : " . $url);
     if (!can_access($conf_property)) {
-        log_action("ERROR", "L'utilisater " . phpCAS::getUser() . " n'a pas les droits pour accéder à l'application " . $appli . "  !");
-        echo $msg_access_problem;
-        exit();
+        log_action("ERROR", "L'utilisateur n'a pas les droits pour accéder à l'application " . $appli . "  !");
+        throw new Exception("L'accès à l'application " . $appli . " est refusé par le filtre.");
     }
     if ($DEV_MOD) {
         header('Content-Type: text/plain; charset=utf-8;');
         echo 'header("Location: "' . $url . '", true, 302);';
-        exit();
+        return;
     }
     header('Content-Type: text/html; charset=utf-8;');
     header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
     header("Location: " . $url, true, 302);
-    exit();
 }
 
 function find_default_link($conf_property)

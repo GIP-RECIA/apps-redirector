@@ -187,6 +187,32 @@ $mapping['TEST_REPLACE']['REPLACE']['VALUE_TO_LOWERCASE'] = false;
 assertEquals('https://service.test/MIXED', do_replacement($mapping['TEST_REPLACE'], 'https://service.test/%TestReplacement%'), 'REPLACE: majuscules configurées');
 assertEquals('https://service.test/unchanged', do_replacement(array(), 'https://service.test/unchanged'), 'REPLACE: règle absente');
 
+set_attrs(array());
+assertThrows('REPLACE: attribut absent', function () use ($mapping) {
+    do_replacement($mapping['TEST_REPLACE'], 'https://service.test/%TestReplacement%');
+});
+
+set_attrs(array('TestReplacement' => array('first', 'second')));
+assertThrows('REPLACE: attribut à valeurs multiples', function () use ($mapping) {
+    do_replacement($mapping['TEST_REPLACE'], 'https://service.test/%TestReplacement%');
+});
+
+$appli = 'TEST_ROUTING';
+assertThrows('Redirection: cible absente', function () use ($mapping) {
+    do_redirect($mapping['TEST_ROUTING'], 'null');
+});
+
+set_attrs(array('TestDeniedIdentifier' => '8880000A', 'TestAccess' => 'denied'));
+$appli = 'TEST_FILTER_DENIED';
+assertThrows('Redirection: filtre refusé', function () use ($mapping) {
+    do_redirect($mapping['TEST_FILTER_DENIED'], 'https://service.test/denied');
+});
+
+set_attrs(array('TestRole' => 'staff'));
+assertThrows('Accès: filtre invalide', function () {
+    can_access(array('FILTER' => array('USER_ATTRIBUTE' => 'TestRole', 'REGEX' => '/[/')));
+});
+
 if ($fails === 0) {
     print "Tests de résolution: OK ($tests assertions)\n";
     exit(0);

@@ -77,6 +77,12 @@ $mapping['TEST_FILTER_DENIED']['FILTER'] = array(
 
 $mapping['TEST_REPLACE']['REPLACE']['USER_ATTRIBUTE'] = 'TestReplacement';
 
+$mapping['TEST_REPLACE_FAILURE']['USER_ATTRIBUTE'] = 'TestReplaceIdentifier';
+$mapping['TEST_REPLACE_FAILURE']['LINK'] = array(
+    '9990000A' => 'https://service.test/%TestReplacement%',
+);
+$mapping['TEST_REPLACE_FAILURE']['REPLACE']['USER_ATTRIBUTE'] = 'TestReplacement';
+
 $testAndFilter = array(
     'OPERATOR' => 'AND',
     'RULES' => array(

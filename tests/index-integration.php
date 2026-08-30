@@ -119,6 +119,10 @@ list($status, $output) = run_index('TEST_FILTER_DENIED', array('TestDeniedIdenti
 assertEquals(0, $status, 'Filtre refusé: code de sortie');
 assertEquals($accessProblem, $output, 'Filtre refusé: message d’accès');
 
+list($status, $output) = run_index('TEST_REPLACE_FAILURE', array('TestReplaceIdentifier' => '9990000A'), 'redirector.test');
+assertEquals(0, $status, 'REPLACE invalide: code de sortie');
+assertEquals($accessProblem, $output, 'REPLACE invalide: message d’accès');
+
 list($status, $output) = run_index('UNKNOWN', array(), 'redirector.test');
 assertEquals(0, $status, 'Application inconnue: code de sortie');
 assertEquals($accessProblem, $output, 'Application inconnue: message d’accès');

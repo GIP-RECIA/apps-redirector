@@ -111,12 +111,17 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
           log_action("INFO", "Aucun DEFAULT_LINK n'est défini pour l'application " . $appli . ".");
         }
         // si url de redirect OK
-        if (! is_null($redirect_rslt)) do_redirect($mapping[$appli], $redirect_rslt);
+        if (! is_null($redirect_rslt)) {
+          do_redirect($mapping[$appli], $redirect_rslt);
+          exit();
+        }
         // sinon message d'erreur
         log_action("DEBUG", "Aucune url de redirection n'a été trouvée.");
         echo $msg_access_problem;
-      } catch (Exception $e) {
+      } catch (Throwable $e) {
+        log_action("ERROR", $e->getMessage());
         echo $msg_access_problem;
+        exit();
       }
     } else if (array_key_exists('USER_ATTRIBUTE',$mapping[$appli]) && array_key_exists('LINK',$mapping[$appli])) {
       log_action("DEBUG", "Cas de configuration sur le mapping attribut utilisateur");
@@ -138,12 +143,17 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
             $redirect_rslt = find_default_link($mapping[$appli]);
           }
           // si url de redirect OK
-          if (! is_null($redirect_rslt)) do_redirect($mapping[$appli], $redirect_rslt);
+          if (! is_null($redirect_rslt)) {
+            do_redirect($mapping[$appli], $redirect_rslt);
+            exit();
+          }
           // sinon message d'erreur
           log_action("INFO", "Aucune URL de redirection n'a été trouvée pour l'application " . $appli . " avec l'attribut " . $user_attr . ".");
           echo $msg_access_problem;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+          log_action("ERROR", $e->getMessage());
           echo $msg_access_problem;
+          exit();
         }
       } else {
         log_action("ERROR", "Le serveur CAS n'a pas retourné d'attribut utilisateur souhaité pour l'application " . $appli . ".");
