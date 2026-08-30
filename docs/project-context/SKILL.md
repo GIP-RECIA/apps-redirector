@@ -51,7 +51,7 @@ The private configuration repository is separate from this application repositor
 8. Read `$_GET['appli']`.
 9. Resolve redirect URL from `$mapping[$appli]`.
 10. Check optional access filter with `can_access()`.
-11. Redirect with `do_redirect()` or display `$msg_access_problem`.
+11. Resolve the target with `resolve_redirect_target()`, then redirect with `do_redirect()` or display the access-denied page.
 
 When `$DEV_MOD=true` and `check_authorized_access()` allows the request IP, the entrypoint enables PHP error display and `do_redirect()` shows the resolved 302 `Location` header instead of redirecting. The mode is inactive for other IPs.
 
@@ -102,6 +102,7 @@ This model is used for applications such as `PDFONLINE` and `MYPADS`: the contro
 - `match_filter_condition($condition)`: checks one `USER_ATTRIBUTE`/`REGEX` filter condition against CAS attributes.
 - `do_replacement($conf_property, $chaine)`: replaces `%USER_ATTRIBUTE%` placeholder using a CAS attribute value.
 - `do_redirect($conf_property, $url)`: validates the redirect target, applies replacements, checks access, then sends a 302 redirect.
+- `resolve_redirect_target($appli, $current_domain = null)`: centralizes redirect resolution for both domain-based and attribute-based mappings.
 - `find_default_link($conf_property)`: resolves an application default URL from `DEFAULT_LINK`.
 - `find_link_override($conf_property)`: resolves an optional application-level `LINK` override before domain mapping.
 - `find_regex_link($conf_property, $user_attr = null)`: resolves an optional application-level `REGEX_LINK` override from configured CAS attributes.

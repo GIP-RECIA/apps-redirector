@@ -81,93 +81,21 @@ log_action("DEBUG","La version du client phpCAS est : " . phpCAS::getVersion());
 log_action("DEBUG","Les attributs CAS fournis sont : ".implode(', ', array_keys($CAS_attrs)));
 log_action("TRACE","Le tableau des attributs CAS fournis est : ".print_r($CAS_attrs, true));
 if (isset($_GET['appli']) and $_GET['appli']!="" ){
-  log_action("INFO","Le nom de l'application demandée est : ".$_GET['appli']);
+  log_action("INFO","Le nom de l'application demandée est : ". $_GET['appli']);
   $appli = $_GET['appli'];
-  if (is_array($mapping) && array_key_exists($appli, $mapping)){
-    log_action("TRACE", "L'application demandée fait bien partie de la liste des applications configurées.");
-    if (array_key_exists('DOMAIN_MAP',$mapping[$appli])) {
-      log_action("DEBUG", "Cas de configuration sur le mapping de domaine");
-      log_action("DEBUG", "Les clés de configuration définies pour l'application sont : ".implode(', ', array_keys($mapping[$appli])));
-      log_action("TRACE", "Le tableau des liens associés aux domaines courants définis pour l'application est : ".print_r($mapping[$appli], true));
-      try {
-        $current_domain = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
-        $redirect_rslt = find_link_override($mapping[$appli]);
-        if (is_null($redirect_rslt)) {
-          $redirect_rslt = find_regex_link($mapping[$appli]);
-        }
-        if (is_null($redirect_rslt)) {
-          $redirect_rslt = find_domain_link($mapping[$appli], $current_domain);
-        }
-        $default_redirect = array_key_exists('DEFAULT_LINK', $mapping[$appli]) ? $mapping[$appli]['DEFAULT_LINK'] : null;
-        log_action("DEBUG", "Recherche de l'URL de redirection pour le domaine courant '". $current_domain ."'");
-        if (is_null($redirect_rslt)) {
-          log_action("INFO", "Aucune URL n'est configurée pour le domaine courant '" . $current_domain . "' et l'application " . $appli . ".");
-        }
-        if (is_null($redirect_rslt) && ! is_null($default_redirect)) {
-          log_action("DEBUG", "Mapping de domaine sur domaine non configuré, appliquer redirection sur l'URL par défaut défini");
-          $redirect_rslt = $default_redirect;
-        } else if (is_null($redirect_rslt)) {
-          log_action("INFO", "Aucun DEFAULT_LINK n'est défini pour l'application " . $appli . ".");
-        }
-        // si url de redirect OK
-        if (! is_null($redirect_rslt)) {
-          do_redirect($mapping[$appli], $redirect_rslt);
-          exit();
-        }
-        // sinon message d'erreur
-        log_action("DEBUG", "Aucune url de redirection n'a été trouvée.");
-        render_access_denied_page();
-      } catch (Throwable $e) {
-        log_action("ERROR", $e->getMessage());
-        render_access_denied_page();
-        exit();
-      }
-    } else if (array_key_exists('USER_ATTRIBUTE',$mapping[$appli]) && array_key_exists('LINK',$mapping[$appli])) {
-      log_action("DEBUG", "Cas de configuration sur le mapping attribut utilisateur");
-      $user_attr = $mapping[$appli]['USER_ATTRIBUTE'];
-      $user_attr_fallback = array_key_exists('USER_ATTRIBUTE_FALLBACK', $mapping[$appli]) ? $mapping[$appli]['USER_ATTRIBUTE_FALLBACK'] : null;
-      log_action("DEBUG", "Le nom de l'attribut CAS utilisé pour le mapping avec le lien est : ".$user_attr);
-      log_action("DEBUG", "Les clés de configuration définies pour l'application sont : ".implode(', ', array_keys($mapping[$appli])));
-      log_action("TRACE", "Le tableau des liens associés aux propriétés définies pour l'application est : ".print_r($mapping[$appli], true));
-      log_action("DEBUG", "Le nom de l'attribut CAS de fallback utilisé pour le mapping avec le lien est : ".$user_attr_fallback);
-      if (is_array($CAS_attrs)){
-        try {
-          $redirect_rslt = find_cas_attr($user_attr, $appli);
-          // fallback sur l'attribut de fallback si défini
-          if (is_null($redirect_rslt) && ! is_null($user_attr_fallback)) {
-            log_action("DEBUG", "L'attribut utilisateur de fallback sera utilisé pour le mapping car l'attribut de base n'est pas fourni.");
-            $redirect_rslt = find_cas_attr($user_attr_fallback, $appli);
-          }
-          if (is_null($redirect_rslt)) {
-            $redirect_rslt = find_default_link($mapping[$appli]);
-          }
-          // si url de redirect OK
-          if (! is_null($redirect_rslt)) {
-            do_redirect($mapping[$appli], $redirect_rslt);
-            exit();
-          }
-          // sinon message d'erreur
-          log_action("INFO", "Aucune URL de redirection n'a été trouvée pour l'application " . $appli . " avec l'attribut " . $user_attr . ".");
-          render_access_denied_page();
-        } catch (Throwable $e) {
-          log_action("ERROR", $e->getMessage());
-          render_access_denied_page();
-          exit();
-        }
-      } else {
-        log_action("ERROR", "Le serveur CAS n'a pas retourné d'attribut utilisateur souhaité pour l'application " . $appli . ".");
-        log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
-        render_access_denied_page();
-      }
-    } else {
-      log_action("DEBUG", "Erreur de configuration sur un attribut de mapping");
-      log_action("ERROR", "Les propriétés USER_ATTRIBUTE + LINK ou DOMAIN_MAP dans la property \$mapping['".$appli."'] doivent être renseignées !");
-      render_access_denied_page();
+  try {
+    $current_domain = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+    $redirect_rslt = resolve_redirect_target($appli, $current_domain);
+    if (! is_null($redirect_rslt)) {
+      do_redirect($mapping[$appli], $redirect_rslt);
       exit();
     }
-  } else {
-    log_action("ERROR","L'application demandée n'est pas définie dans la configuration, vérifiez la configuration (dans le fichier conf.inc.php).");
+    log_action("DEBUG", "Aucune url de redirection n'a été trouvée.");
     render_access_denied_page();
+  } catch (Throwable $e) {
+    log_action("ERROR", $e->getMessage());
+    render_access_denied_page();
+    exit();
   }
 } else {
   log_action("ERROR","Il manque le paramètre définissant l'application en paramètre de l'url d'accès !");

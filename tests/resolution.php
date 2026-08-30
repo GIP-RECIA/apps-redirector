@@ -120,6 +120,12 @@ assertEquals($baseUrl . '/target-domain-exact', find_link_override($mapping['TES
 set_attrs(array('TestDomainIdentifier' => '7770000A'));
 assertEquals($baseUrl . '/target-domain-regex', find_regex_link($mapping['TEST_DOMAIN']), 'Domaine: REGEX_LINK');
 
+set_attrs(array('TestDomainIdentifier' => '7771234A'));
+assertEquals($baseUrl . '/target-domain-exact', resolve_redirect_target('TEST_DOMAIN', 'redirector.test'), 'Résolveur: domaine exact');
+
+set_attrs(array('TestIdentifier' => '1234567A'));
+assertEquals($baseUrl . '/target-c', resolve_redirect_target('TEST_ROUTING', 'redirector.test'), 'Résolveur: attribut exact');
+
 print "Domaine testé: redirector.test\n";
 assertEquals('https://service.test/domain-map', find_domain_link($mapping['TEST_DOMAIN'], 'redirector.test'), 'DOMAIN_MAP: domaine connu');
 

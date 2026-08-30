@@ -150,6 +150,52 @@ function do_redirect($conf_property, $url)
     header("Location: " . $url, true, 302);
 }
 
+function resolve_redirect_target($appli, $current_domain = null)
+{
+    global $mapping, $CAS_attrs;
+
+    if (!is_array($mapping) || !array_key_exists($appli, $mapping)) {
+        throw new Exception("L'application demandée n'est pas définie dans la configuration, vérifiez la configuration (dans le fichier conf.inc.php).");
+    }
+
+    $conf_property = $mapping[$appli];
+    if (array_key_exists('DOMAIN_MAP', $conf_property)) {
+        if (is_null($current_domain)) {
+            $current_domain = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+        }
+        $redirect_rslt = find_link_override($conf_property);
+        if (is_null($redirect_rslt)) {
+            $redirect_rslt = find_regex_link($conf_property);
+        }
+        if (is_null($redirect_rslt)) {
+            $redirect_rslt = find_domain_link($conf_property, $current_domain);
+        }
+        if (is_null($redirect_rslt) && array_key_exists('DEFAULT_LINK', $conf_property)) {
+            return $conf_property['DEFAULT_LINK'];
+        }
+        return $redirect_rslt;
+    }
+
+    if (array_key_exists('USER_ATTRIBUTE', $conf_property) && array_key_exists('LINK', $conf_property)) {
+        if (!is_array($CAS_attrs)) {
+            throw new Exception("Le serveur CAS n'a pas retourné d'attribut utilisateur souhaité pour l'application " . $appli . ".");
+        }
+        $user_attr = $conf_property['USER_ATTRIBUTE'];
+        $user_attr_fallback = array_key_exists('USER_ATTRIBUTE_FALLBACK', $conf_property) ? $conf_property['USER_ATTRIBUTE_FALLBACK'] : null;
+        $redirect_rslt = find_cas_attr($user_attr, $appli);
+        if (is_null($redirect_rslt) && ! is_null($user_attr_fallback)) {
+            log_action("DEBUG", "L'attribut utilisateur de fallback sera utilisé pour le mapping car l'attribut de base n'est pas fourni.");
+            $redirect_rslt = find_cas_attr($user_attr_fallback, $appli);
+        }
+        if (is_null($redirect_rslt)) {
+            $redirect_rslt = find_default_link($conf_property);
+        }
+        return $redirect_rslt;
+    }
+
+    throw new Exception("Les propriétés USER_ATTRIBUTE + LINK ou DOMAIN_MAP dans la property \$mapping['" . $appli . "'] doivent être renseignées !");
+}
+
 function find_default_link($conf_property)
 {
     if (array_key_exists('DEFAULT_LINK', $conf_property)) {
