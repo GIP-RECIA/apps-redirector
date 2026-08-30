@@ -128,12 +128,13 @@ Real configuration must stay out of the application repository. Use `conf/conf.i
 
 The real configuration lives in `../esco-apps-redirector-conf`. Changes here must stay compatible with that repository.
 
-When changing mapping behavior or adding configuration keys, update and verify both sides:
+When changing mapping behavior, adding configuration keys, or modifying `opencode.json` (centralized in `~/.config/opencode/opencode.json`), update and verify both sides:
 
 - Application implementation in `index.php` and `getConfJson.php` when relevant.
 - Public examples in `conf/conf.inc.example.php`.
 - Application skills in `docs/configuration/SKILL.md` and `docs/project-context/SKILL.md`.
 - Private config skills in `../esco-apps-redirector-conf/docs/configuration/SKILL.md` and `../esco-apps-redirector-conf/docs/project-context/SKILL.md`.
+- `opencode.json` in both the project and `../esco-apps-redirector-conf/opencode.json`.
 
 Do not use a new key in `../esco-apps-redirector-conf/prod/conf.inc.php` until the deployed application supports it.
 

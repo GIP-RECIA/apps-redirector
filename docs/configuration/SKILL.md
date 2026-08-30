@@ -9,7 +9,7 @@ This document describes the main configuration variables used by ESCO Apps Redir
 
 Real configuration files are private and must not be committed. Use the `*.example.php` files as templates.
 
-Real deployed configuration is maintained in `../esco-apps-redirector-conf`. When adding a configuration key or changing resolution behavior, update that repository's human-readable skills too and confirm the private configuration only uses features supported by deployed application code.
+Real deployed configuration is maintained in `../esco-apps-redirector-conf`. When adding a configuration key or changing resolution behavior, update that repository's human-readable skills too and confirm the private configuration only uses features supported by deployed application code. This coordination also applies to `opencode.json`: any change to `model`, `small_model`, `thinking_budget`, `plan_mode`, `exclude_patterns`, or `skills` must be mirrored in both `opencode.json` (project) and `../esco-apps-redirector-conf/opencode.json`, with shared values centralized in `~/.config/opencode/opencode.json`.
 
 ## Global Variables
 
