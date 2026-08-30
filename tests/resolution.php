@@ -129,6 +129,10 @@ assertEquals('https://service.test/domain-default', find_default_link($mapping['
 
 // FILTER simple, composé, imbriqué et erreurs de configuration.
 $routingFilter = $mapping['TEST_ROUTING']['FILTER'];
+$legacyFilter = array(
+    'USER_ATTRIBUTE' => 'TestLegacyRole',
+    'REGEX'          => '/^editor$/',
+);
 
 set_attrs(array('TestIdentifier' => '1230000A'));
 check(evaluate_filter_rule($routingFilter) === true, 'Filtre OR: identifiant autorisé');
@@ -138,6 +142,15 @@ check(evaluate_filter_rule($routingFilter) === false, 'Filtre OR: identifiant ex
 
 set_attrs(array('TestFallbackIdentifier' => '19999999999999'));
 check(evaluate_filter_rule($routingFilter) === true, 'Filtre OR: fallback synthétique');
+
+set_attrs(array('TestLegacyRole' => 'editor'));
+check(evaluate_filter_rule($legacyFilter) === true, 'Filtre historique: attribut autorisé');
+
+set_attrs(array('TestLegacyRole' => 'reader'));
+check(evaluate_filter_rule($legacyFilter) === false, 'Filtre historique: attribut refusé');
+
+set_attrs(array('TestLegacyRole' => array('reader', 'editor')));
+check(evaluate_filter_rule($legacyFilter) === true, 'Filtre historique: tableau contenant une valeur autorisée');
 
 set_attrs(array('TestRole' => 'staff', 'TestRegion' => 'north'));
 check(evaluate_filter_rule($testAndFilter) === true, 'Filtre AND imbriqué: première branche OR');
