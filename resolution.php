@@ -4,7 +4,7 @@
  * testables indépendamment du contrôleur front (sans phpCAS).
  *
  * Ces fonctions dépendent des variables globales $mapping, $CAS_attrs, $appli,
- * $DEV_MOD, $msg_access_problem et de log_action()/log_lvl_to_int().
+ * $DEV_MOD, render_access_denied_page() et de log_action()/log_lvl_to_int().
  */
 
 function can_access($conf_property)

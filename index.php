@@ -80,7 +80,6 @@ log_action("INFO","L'utilisateur est correctement authentifié et son uid est : 
 log_action("DEBUG","La version du client phpCAS est : " . phpCAS::getVersion());
 log_action("DEBUG","Les attributs CAS fournis sont : ".implode(', ', array_keys($CAS_attrs)));
 log_action("TRACE","Le tableau des attributs CAS fournis est : ".print_r($CAS_attrs, true));
-$msg_access_problem = '<div style="text-align:center;margin-left: auto;margin-right: auto;">Vous n\'avez pas acc&egrave;s &agrave; ce service !</div>';
 if (isset($_GET['appli']) and $_GET['appli']!="" ){
   log_action("INFO","Le nom de l'application demandée est : ".$_GET['appli']);
   $appli = $_GET['appli'];
@@ -117,10 +116,10 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
         }
         // sinon message d'erreur
         log_action("DEBUG", "Aucune url de redirection n'a été trouvée.");
-        echo $msg_access_problem;
+        render_access_denied_page();
       } catch (Throwable $e) {
         log_action("ERROR", $e->getMessage());
-        echo $msg_access_problem;
+        render_access_denied_page();
         exit();
       }
     } else if (array_key_exists('USER_ATTRIBUTE',$mapping[$appli]) && array_key_exists('LINK',$mapping[$appli])) {
@@ -149,29 +148,29 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
           }
           // sinon message d'erreur
           log_action("INFO", "Aucune URL de redirection n'a été trouvée pour l'application " . $appli . " avec l'attribut " . $user_attr . ".");
-          echo $msg_access_problem;
+          render_access_denied_page();
         } catch (Throwable $e) {
           log_action("ERROR", $e->getMessage());
-          echo $msg_access_problem;
+          render_access_denied_page();
           exit();
         }
       } else {
         log_action("ERROR", "Le serveur CAS n'a pas retourné d'attribut utilisateur souhaité pour l'application " . $appli . ".");
         log_action("TRACE", "Le tableau des attributs CAS fournis est : " . print_r($CAS_attrs, true));
-        echo $msg_access_problem;
+        render_access_denied_page();
       }
     } else {
       log_action("DEBUG", "Erreur de configuration sur un attribut de mapping");
       log_action("ERROR", "Les propriétés USER_ATTRIBUTE + LINK ou DOMAIN_MAP dans la property \$mapping['".$appli."'] doivent être renseignées !");
-      echo $msg_access_problem;
+      render_access_denied_page();
       exit();
     }
   } else {
     log_action("ERROR","L'application demandée n'est pas définie dans la configuration, vérifiez la configuration (dans le fichier conf.inc.php).");
-    echo $msg_access_problem;
+    render_access_denied_page();
   }
 } else {
   log_action("ERROR","Il manque le paramètre définissant l'application en paramètre de l'url d'accès !");
-  echo $msg_access_problem;
+  render_access_denied_page();
 }
 ?>

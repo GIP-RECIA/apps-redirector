@@ -48,4 +48,22 @@ function check_authorized_access() {
   return $allow_access;
 }
 
+function render_access_denied_page(string $message = "Vous n'avez pas acc&egrave;s &agrave; ce service !"): void
+{
+  http_response_code(403);
+  header('Content-Type: text/html; charset=utf-8');
+  echo '<!doctype html>';
+  echo '<html lang="fr">';
+  echo '<head>';
+  echo '<meta charset="utf-8">';
+  echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
+  echo '<title>Accès refusé</title>';
+  echo '<style>body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f7fb;color:#1f2937}main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}section{max-width:28rem;background:#fff;border:1px solid #dbe3ee;border-radius:12px;padding:28px 24px;box-shadow:0 6px 24px rgba(15,23,42,.08);text-align:center}h1{margin:0 0 12px;font-size:1.35rem}p{margin:0;line-height:1.5}</style>';
+  echo '</head>';
+  echo '<body>';
+  echo '<main><section><h1>Accès refusé</h1><p>' . $message . '</p></section></main>';
+  echo '</body>';
+  echo '</html>';
+}
+
 ?>

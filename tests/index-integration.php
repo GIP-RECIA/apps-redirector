@@ -10,7 +10,13 @@ error_reporting(E_ALL);
 
 $tests = 0;
 $fails = 0;
-$accessProblem = '<div style="text-align:center;margin-left: auto;margin-right: auto;">Vous n\'avez pas acc&egrave;s &agrave; ce service !</div>';
+
+function access_denied_page(): string
+{
+    return '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Accès refusé</title><style>body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f7fb;color:#1f2937}main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}section{max-width:28rem;background:#fff;border:1px solid #dbe3ee;border-radius:12px;padding:28px 24px;box-shadow:0 6px 24px rgba(15,23,42,.08);text-align:center}h1{margin:0 0 12px;font-size:1.35rem}p{margin:0;line-height:1.5}</style></head><body><main><section><h1>Accès refusé</h1><p>Vous n\'avez pas acc&egrave;s &agrave; ce service !</p></section></main></body></html>';
+}
+
+$accessProblem = access_denied_page();
 
 function assertEquals($expected, $actual, string $label): void
 {
