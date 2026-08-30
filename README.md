@@ -11,3 +11,13 @@ These documentation files double as opencode skills (`docs/<skill>/SKILL.md`).
 - [Application deployment](docs/deploy-app/SKILL.md): dry-run by default deployment helper for application sources.
 
 Private production configuration is intentionally stored in a separate private repository and must not be committed here.
+
+## phpCAS Installation
+
+phpCAS is recommended through Composer to avoid its legacy-autoloader warning:
+
+```bash
+composer require apereo/phpcas
+```
+
+Set `$PATH_CAS_LIB=__DIR__ . '/../vendor/autoload.php';` in the private configuration. The historical direct `CAS.php` path remains supported; see the [configuration example](conf/conf.inc.example.php).

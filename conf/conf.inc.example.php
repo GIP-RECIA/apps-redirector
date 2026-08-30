@@ -4,6 +4,9 @@ $LOG_LVL="INFO"; // TRACE,DEBUG,INFO,WARN,ERROR sont les valeurs possibles, atte
 //$LOG_LVL="DEBUG"; // TRACE,DEBUG,INFO,WARN,ERROR sont les valeurs possibles, attention à la CASSE !
 $DEV_MOD=false;
 $PATH_CAS_LIB="/var/www/phpCAS/phpCAS-1.6.2/CAS.php";
+// Installation recommandée : composer require apereo/phpcas
+// https://packagist.org/packages/apereo/phpcas
+// $PATH_CAS_LIB=__DIR__ . '/../vendor/autoload.php';
 $PATH_CAS_CONFIG="conf/cas.inc.php";
 $LOG_FILENAME = "logs/" . date("Y-m-d") . ".log";
 $PHPCAS_LOG_FILENAME="logs/phpCAS.log";

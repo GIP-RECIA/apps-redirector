@@ -39,7 +39,21 @@ $DEV_MOD=false;
 
 `$PATH_CAS_LIB`
 
-Path to the phpCAS library entry point.
+Path to the phpCAS library entry point. Composer installation is recommended because phpCAS emits a deprecation warning when its legacy autoloader is loaded directly.
+
+Install phpCAS from the application root:
+
+```bash
+composer require apereo/phpcas
+```
+
+Then configure the Composer autoloader:
+
+```php
+$PATH_CAS_LIB=__DIR__ . '/../vendor/autoload.php';
+```
+
+The direct path remains supported for historical installations, but it can emit the phpCAS legacy-autoloader warning:
 
 Example:
 

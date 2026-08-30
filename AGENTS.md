@@ -10,9 +10,9 @@ php -l resolution.php
 php tests/resolution.php
 ```
 
-The Composer manifest is isolated to `ci/composer.json`; it installs phpCAS only for CI verification and is not used by deployment.
+The Composer manifest under `ci/` installs phpCAS only for CI verification. Runtime configuration can also set `$PATH_CAS_LIB` to a Composer `vendor/autoload.php` path; the direct `CAS.php` path remains supported for historical installations.
 
-The app cannot run standalone: it needs the external phpCAS library (`$PATH_CAS_LIB` in `conf/conf.inc.php`, e.g. `/var/www/phpCAS/phpCAS-1.6.2/CAS.php`) plus real CAS/conf files that are not in this repo.
+The app cannot run standalone: it needs phpCAS through `$PATH_CAS_LIB` in `conf/conf.inc.php` plus real CAS/conf files that are not in this repo.
 
 ## Entrypoints
 
