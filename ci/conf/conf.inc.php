@@ -4,7 +4,18 @@
  * utilisée par les tests unitaires de résolution.
  */
 
-$_SERVER['SERVER_NAME'] = 'redirector.test';
+if (!isset($_SERVER['SERVER_NAME'])) {
+    $_SERVER['SERVER_NAME'] = 'redirector.test';
+}
+
+$LOG_LVL = 'ERROR';
+$DEV_MOD = true;
+$PATH_CAS_LIB = 'ci/fake-phpcas.php';
+$PATH_CAS_CONFIG = 'ci/conf/cas.inc.php';
+$LOG_FILENAME = sys_get_temp_dir() . '/esco-apps-redirector-ci.log';
+$PHPCAS_LOG_FILENAME = sys_get_temp_dir() . '/esco-apps-redirector-phpcas-ci.log';
+$AUTORIZED_IPS = array();
+$AUTORIZED_SUBNET = array('127.0.0.');
 
 $allowedIdentifierRegex = '/^(?!(?:1234567Z)$)[0-9]{7}[A-Z]$/i';
 
@@ -55,6 +66,14 @@ $mapping['TEST_DOMAIN']['DOMAIN_MAP'] = array(
     'redirector.test' => 'https://service.test/domain-map',
 );
 $mapping['TEST_DOMAIN']['DEFAULT_LINK'] = 'https://service.test/domain-default';
+
+$mapping['TEST_FILTER_DENIED']['USER_ATTRIBUTE'] = 'TestDeniedIdentifier';
+$mapping['TEST_FILTER_DENIED']['LINK'] = array();
+$mapping['TEST_FILTER_DENIED']['LINK']['8880000A'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-filter-denied';
+$mapping['TEST_FILTER_DENIED']['FILTER'] = array(
+    'USER_ATTRIBUTE' => 'TestAccess',
+    'REGEX'          => '/^allowed$/',
+);
 
 $mapping['TEST_REPLACE']['REPLACE']['USER_ATTRIBUTE'] = 'TestReplacement';
 

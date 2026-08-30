@@ -8,11 +8,14 @@ Resolution tests and a GitHub Actions workflow are available. Verify changes wit
 php -l index.php
 php -l resolution.php
 php tests/resolution.php
+php tests/index-integration.php
 ```
 
 The Composer manifest under `ci/` installs phpCAS only for CI verification. Runtime configuration can also set `$PATH_CAS_LIB` to a Composer `vendor/autoload.php` path; the direct `CAS.php` path remains supported for historical installations.
 
 The app cannot run standalone: it needs phpCAS through `$PATH_CAS_LIB` in `conf/conf.inc.php` plus real CAS/conf files that are not in this repo.
+
+`REDIRECTOR_CONFIG` is reserved for CI and tests to load `ci/conf/conf.inc.php`; unset, the application loads the deployed `conf/conf.inc.php`.
 
 ## Entrypoints
 

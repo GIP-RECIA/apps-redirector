@@ -1,6 +1,7 @@
 <?php
-// Fichier des associations et des propriétés
-include_once('conf/conf.inc.php');
+// Fichier des associations et des propriétés. CI can provide a synthetic config.
+$configPath = getenv('REDIRECTOR_CONFIG') ?: 'conf/conf.inc.php';
+include_once($configPath);
 // import phpCAS lib
 include_once($PATH_CAS_LIB);
 include_once($PATH_CAS_CONFIG);

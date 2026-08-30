@@ -1,6 +1,7 @@
 <?php
 
-include_once('conf/conf.inc.php');
+$configPath = getenv('REDIRECTOR_CONFIG') ?: 'conf/conf.inc.php';
+include_once($configPath);
 
 function log_action($lvl="ERROR",$msg) {
   global $LOG_FILENAME, $LOG_LVL, $CAS_user;

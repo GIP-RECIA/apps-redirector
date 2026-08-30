@@ -43,3 +43,6 @@ jobs:
 
       - name: Run resolution unit tests
         run: php tests/resolution.php
+
+      - name: Run index integration tests
+        run: php tests/index-integration.php
