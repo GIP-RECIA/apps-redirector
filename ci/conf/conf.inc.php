@@ -2,15 +2,10 @@
 /**
  * Configuration synthétique installée par la CI dans conf/conf.inc.php et
  * utilisée par les tests unitaires de résolution.
- *
- * Il ne décrit qu'une application de test avec des identifiants et des routes
- * synthétiques et ne contient aucune donnée privée. Le but est de
- * rendre les tests exécutables sans le dépôt privé de configuration.
  */
 
 $_SERVER['SERVER_NAME'] = 'redirector.test';
 
-// Identifiant exclu du filtre (valeur synthétique).
 $allowedIdentifierRegex = '/^(?!(?:1234567Z)$)[0-9]{7}[A-Z]$/i';
 
 $mapping['TEST_ROUTING']['USER_ATTRIBUTE'] = 'TestIdentifier';
@@ -32,14 +27,56 @@ $mapping['TEST_ROUTING']['FILTER'] = array(
         ),
     ),
 );
-
-// Override exact -> target-c.
-$mapping['TEST_ROUTING']['LINK']['4567890A'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-c';
-// Identifiant exclu -> accès bloqué.
+// The exact link intentionally overlaps the first regex rule.
+$mapping['TEST_ROUTING']['LINK']['1234567A'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-c';
 $mapping['TEST_ROUTING']['LINK']['1234567Z'] = 'null';
-// Fallback synthétique -> target-a.
 $mapping['TEST_ROUTING']['LINK']['19999999999999'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-a';
 
+$mapping['TEST_DEFAULT']['USER_ATTRIBUTE'] = 'TestDefaultIdentifier';
+$mapping['TEST_DEFAULT']['LINK'] = array();
+$mapping['TEST_DEFAULT']['REGEX_LINK'] = array();
+$mapping['TEST_DEFAULT']['REGEX_LINK']['/^321[0-9]{4}[A-Z]$/i'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-default-regex';
+$mapping['TEST_DEFAULT']['DEFAULT_LINK'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-default';
+
+$mapping['TEST_NO_DEFAULT']['USER_ATTRIBUTE'] = 'TestNoDefaultIdentifier';
+$mapping['TEST_NO_DEFAULT']['LINK'] = array();
+
+$mapping['TEST_ARRAY']['USER_ATTRIBUTE'] = 'TestArrayIdentifier';
+$mapping['TEST_ARRAY']['LINK'] = array();
+$mapping['TEST_ARRAY']['LINK']['1110000A'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-array-first';
+$mapping['TEST_ARRAY']['LINK']['2220000B'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-array-second';
+
+$mapping['TEST_DOMAIN']['USER_ATTRIBUTE'] = 'TestDomainIdentifier';
+$mapping['TEST_DOMAIN']['LINK'] = array();
+$mapping['TEST_DOMAIN']['LINK']['7771234A'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-domain-exact';
+$mapping['TEST_DOMAIN']['REGEX_LINK'] = array();
+$mapping['TEST_DOMAIN']['REGEX_LINK']['/^777[0-9]{4}[A-Z]$/i'] = 'https://' . $_SERVER['SERVER_NAME'] . '/target-domain-regex';
 $mapping['TEST_DOMAIN']['DOMAIN_MAP'] = array(
-    'redirector.test' => 'https://service.test/default',
+    'redirector.test' => 'https://service.test/domain-map',
+);
+$mapping['TEST_DOMAIN']['DEFAULT_LINK'] = 'https://service.test/domain-default';
+
+$mapping['TEST_REPLACE']['REPLACE']['USER_ATTRIBUTE'] = 'TestReplacement';
+
+$testAndFilter = array(
+    'OPERATOR' => 'AND',
+    'RULES' => array(
+        array(
+            'USER_ATTRIBUTE' => 'TestRole',
+            'REGEX'          => '/^staff$/',
+        ),
+        array(
+            'OPERATOR' => 'OR',
+            'RULES' => array(
+                array(
+                    'USER_ATTRIBUTE' => 'TestRegion',
+                    'REGEX'          => '/^north$/',
+                ),
+                array(
+                    'USER_ATTRIBUTE' => 'TestTier',
+                    'REGEX'          => '/^gold$/',
+                ),
+            ),
+        ),
+    ),
 );
