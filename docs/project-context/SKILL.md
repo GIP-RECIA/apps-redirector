@@ -9,7 +9,7 @@ description: Project context for esco-apps-redirector, a PHP CAS redirector. Use
 
 This project is a small PHP CAS-based redirector. It authenticates the user with phpCAS, reads CAS attributes, receives an `appli` query parameter, finds the target URL from configured mappings, optionally checks access filters, and redirects the user.
 
-The application must stay compatible with PHP 7.3 through 8.3 (the local CLI is 8.x). Before introducing newer syntax or APIs, such as named arguments, union types, attributes, `match`, constructor property promotion, nullsafe operator, `str_contains()`, enums, or readonly properties, confirm they are safe for PHP 7.3 (no typed properties, no arrow functions).
+The application must stay compatible with PHP 8.3 or newer. PHP 8.3 is the minimum supported version, and the GitHub Actions workflow also tests `latest`. Before introducing newer syntax or APIs, such as named arguments, union types, attributes, `match`, constructor property promotion, nullsafe operator, `str_contains()`, enums, or readonly properties, confirm they are safe for PHP 8.3.
 
 There is no `index.html`. The main entry points are:
 

@@ -61,7 +61,7 @@ When changing mapping behavior, update human-readable skills in both repositorie
 
 ## PHP version
 
-PHP 7.3 through 8.3 compatibility is required (local CLI here is 8.x). Before using newer syntax/APIs (`match`, named args, union types, nullsafe operator, `str_contains()`, constructor promotion, enums, readonly properties...), confirm they are safe for the oldest supported version (7.3: no typed properties, no arrow functions).
+PHP 8.3 is the minimum supported version, and the GitHub Actions workflow runs on PHP 8.3 plus `latest`. Before using newer syntax/APIs (`match`, named args, union types, nullsafe operator, `str_contains()`, constructor promotion, enums, readonly properties...), keep the code valid on PHP 8.3.
 
 ## Deployment
 
