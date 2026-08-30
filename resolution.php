@@ -171,12 +171,11 @@ function find_default_link($conf_property)
     }
 }
 
-function find_domain_link($conf_property)
+function find_domain_link($conf_property, $current_domain)
 {
     if (!array_key_exists('DOMAIN_MAP', $conf_property) || !is_array($conf_property['DOMAIN_MAP'])) {
         return;
     }
-    $current_domain = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
     return array_key_exists($current_domain, $conf_property['DOMAIN_MAP']) ? $conf_property['DOMAIN_MAP'][$current_domain] : null;
 }
 

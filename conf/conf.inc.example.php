@@ -58,8 +58,7 @@ $mapping['APPS_NAME_WITH_COMPLEX_FILTER']['FILTER']=array(
     ),
   ),
 );
-//définition alternative d'un mapping par domaine. DOMAIN est la valeur courante à tester, DOMAIN_MAP contient les associations domaine/url.
-$mapping['APPS_NAME_BY_DOMAIN']['DOMAIN']=$_SERVER['SERVER_NAME'];
+//définition alternative d'un mapping par domaine. Le domaine de la requête est résolu par l'application, DOMAIN_MAP contient les associations domaine/url.
 $mapping['APPS_NAME_BY_DOMAIN']['DEFAULT_LINK']='http://A_DEFAULT_URL';
 $mapping['APPS_NAME_BY_DOMAIN']['DOMAIN_MAP']=array();
 $mapping['APPS_NAME_BY_DOMAIN']['DOMAIN_MAP']['domain.example.org']='http://AN_URL';

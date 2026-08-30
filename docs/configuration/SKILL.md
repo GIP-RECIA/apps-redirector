@@ -336,19 +336,9 @@ Replacement is applied centrally before redirecting, so it works for URLs coming
 
 ## Domain-Based Mapping
 
-Use `DOMAIN` and `DOMAIN_MAP` when the redirect depends on the current HTTP host rather than a CAS attribute.
+Use `DOMAIN_MAP` when the redirect depends on the current HTTP host rather than a CAS attribute. The application resolves `$_SERVER['SERVER_NAME']` at runtime; do not configure a `DOMAIN` key.
 
 This is the preferred model when the application URL is controlled and already identifies the user context, for example one service URL per ENT domain. Establishment-specific `LINK` entries can still be added to override the domain result for known exceptions.
-
-`DOMAIN`
-
-Current value to test. It is usually set from `$_SERVER['SERVER_NAME']`.
-
-Example:
-
-```php
-$mapping['APP_NAME']['DOMAIN']=$_SERVER['SERVER_NAME'];
-```
 
 `DOMAIN_MAP`
 
@@ -364,8 +354,7 @@ $mapping['APP_NAME']['DOMAIN_MAP']['site-b.example.org']='https://service-b.exam
 
 In short:
 
-- `DOMAIN` is the current value being tested.
-- `DOMAIN_MAP` is the lookup table that maps this value to a redirect URL.
+- `DOMAIN_MAP` is the lookup table that maps the current request host to a redirect URL.
 
 This is similar to `USER_ATTRIBUTE` and `LINK`, but the selected value comes from the request domain instead of CAS attributes.
 
@@ -374,7 +363,6 @@ If the application also defines `USER_ATTRIBUTE`, `USER_ATTRIBUTE_FALLBACK`, `LI
 Example:
 
 ```php
-$mapping['APP_NAME']['DOMAIN']=$_SERVER['SERVER_NAME'];
 $mapping['APP_NAME']['USER_ATTRIBUTE']='ESCOUAICourant';
 $mapping['APP_NAME']['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
 $mapping['APP_NAME']['LINK']=array();
@@ -428,7 +416,6 @@ $mapping['REPLACE_APP']['REPLACE']['USER_ATTRIBUTE']='ESCOUAICourant';
 ### Mapping By Domain
 
 ```php
-$mapping['DOMAIN_APP']['DOMAIN']=$_SERVER['SERVER_NAME'];
 $mapping['DOMAIN_APP']['DEFAULT_LINK']='https://default.example.org';
 $mapping['DOMAIN_APP']['DOMAIN_MAP']=array();
 $mapping['DOMAIN_APP']['DOMAIN_MAP']['site-a.example.org']='https://service-a.example.org';
@@ -438,7 +425,6 @@ $mapping['DOMAIN_APP']['DOMAIN_MAP']['site-b.example.org']='https://service-b.ex
 ### Mapping By Domain With Establishment Overrides
 
 ```php
-$mapping['DOMAIN_OVERRIDE_APP']['DOMAIN']=$_SERVER['SERVER_NAME'];
 $mapping['DOMAIN_OVERRIDE_APP']['USER_ATTRIBUTE']='ESCOUAICourant';
 $mapping['DOMAIN_OVERRIDE_APP']['USER_ATTRIBUTE_FALLBACK']='ESCOSIRENCourant';
 $mapping['DOMAIN_OVERRIDE_APP']['LINK']=array();

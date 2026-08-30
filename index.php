@@ -85,18 +85,18 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
   $appli = $_GET['appli'];
   if (is_array($mapping) && array_key_exists($appli, $mapping)){
     log_action("TRACE", "L'application demandée fait bien partie de la liste des applications configurées.");
-    if (array_key_exists('DOMAIN',$mapping[$appli]) && array_key_exists('DOMAIN_MAP',$mapping[$appli])) {
+    if (array_key_exists('DOMAIN_MAP',$mapping[$appli])) {
       log_action("DEBUG", "Cas de configuration sur le mapping de domaine");
       log_action("DEBUG", "Les clés de configuration définies pour l'application sont : ".implode(', ', array_keys($mapping[$appli])));
       log_action("TRACE", "Le tableau des liens associés aux domaines courants définis pour l'application est : ".print_r($mapping[$appli], true));
       try {
-        $current_domain = $mapping[$appli]['DOMAIN'];
+        $current_domain = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
         $redirect_rslt = find_link_override($mapping[$appli]);
         if (is_null($redirect_rslt)) {
           $redirect_rslt = find_regex_link($mapping[$appli]);
         }
         if (is_null($redirect_rslt)) {
-          $redirect_rslt = array_key_exists($current_domain, $mapping[$appli]['DOMAIN_MAP']) ? $mapping[$appli]['DOMAIN_MAP'][$current_domain] : null;
+          $redirect_rslt = find_domain_link($mapping[$appli], $current_domain);
         }
         $default_redirect = array_key_exists('DEFAULT_LINK', $mapping[$appli]) ? $mapping[$appli]['DEFAULT_LINK'] : null;
         log_action("DEBUG", "Recherche de l'URL de redirection pour le domaine courant '". $current_domain ."'");
@@ -151,7 +151,7 @@ if (isset($_GET['appli']) and $_GET['appli']!="" ){
       }
     } else {
       log_action("DEBUG", "Erreur de configuration sur un attribut de mapping");
-      log_action("ERROR", "Les propriétés USER_ATTRIBUTE + LINK ou DOMAIN + DOMAIN_MAP dans la property \$mapping['".$appli."'] doivent être renseignées !");
+      log_action("ERROR", "Les propriétés USER_ATTRIBUTE + LINK ou DOMAIN_MAP dans la property \$mapping['".$appli."'] doivent être renseignées !");
       echo $msg_access_problem;
       exit();
     }

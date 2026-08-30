@@ -114,7 +114,7 @@ check(evaluate_filter_rule($routingFilter) === true, 'Filtre: identifiant non ex
 set_attrs(array('OTHER_ATTRIBUTE' => 'value'));
 check(evaluate_filter_rule($routingFilter) === false, 'Filtre: attribut absent');
 
-assertEquals('https://service.test/default', find_domain_link($mapping['TEST_DOMAIN']), 'DOMAIN_MAP: domaine courant');
+assertEquals('https://service.test/default', find_domain_link($mapping['TEST_DOMAIN'], $_SERVER['SERVER_NAME']), 'DOMAIN_MAP: domaine courant');
 
 if ($fails === 0) {
     print "Tests de résolution: OK ($tests assertions)\n";

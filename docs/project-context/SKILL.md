@@ -59,7 +59,7 @@ When `$DEV_MOD=true` and `check_authorized_access()` allows the request IP, the 
 
 Two mapping modes exist:
 
-- Domain mapping: requires `DOMAIN` and `DOMAIN_MAP` under `$mapping[$appli]`.
+- Domain mapping: requires `DOMAIN_MAP` under `$mapping[$appli]`; the application resolves the current host at runtime.
 - CAS attribute mapping: requires `USER_ATTRIBUTE` and `LINK` under `$mapping[$appli]`.
 
 Attribute mapping can use `USER_ATTRIBUTE_FALLBACK` if the main attribute does not produce a redirect.
@@ -89,7 +89,7 @@ For domain mappings, the resolution order is:
 
 1. Match application-level `LINK` overrides when `USER_ATTRIBUTE` or `USER_ATTRIBUTE_FALLBACK` are configured.
 2. Match application-level `REGEX_LINK` overrides when `USER_ATTRIBUTE` or `USER_ATTRIBUTE_FALLBACK` are configured.
-3. Match the current `DOMAIN` value against application `DOMAIN_MAP`.
+3. Match the current request host against application `DOMAIN_MAP`.
 4. Use application `DEFAULT_LINK` when configured.
 5. Show the standard access problem message.
 
@@ -112,7 +112,6 @@ This model is used for applications such as `PDFONLINE` and `MYPADS`: the contro
 Keep generic application defaults near the application declaration:
 
 - `DEFAULT_LINK`
-- `DOMAIN`
 - `DOMAIN_MAP`
 - `USER_ATTRIBUTE`
 - `USER_ATTRIBUTE_FALLBACK`
