@@ -46,3 +46,6 @@ jobs:
 
       - name: Run index integration tests
         run: php tests/index-integration.php
+
+      - name: Run HTTP index tests
+        run: php tests/http-index.php

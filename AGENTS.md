@@ -9,6 +9,7 @@ php -l index.php
 php -l resolution.php
 php tests/resolution.php
 php tests/index-integration.php
+php tests/http-index.php
 ```
 
 The Composer manifest under `ci/` installs phpCAS only for CI verification. Runtime configuration can also set `$PATH_CAS_LIB` to a Composer `vendor/autoload.php` path; the direct `CAS.php` path remains supported for historical installations.
