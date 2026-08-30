@@ -1,7 +1,7 @@
 <?php
 /**
- * Fixture de configuration interne au dépôt applicatif, utilisé par les tests
- * unitaires de résolution (tests/resolution.php).
+ * Configuration synthétique installée par la CI dans conf/conf.inc.php et
+ * utilisée par les tests unitaires de résolution.
  *
  * Il ne décrit qu'une application de test avec des identifiants et des routes
  * synthétiques et ne contient aucune donnée privée. Le but est de

@@ -27,6 +27,8 @@ Any change to mapping keys or configuration structure impacts both entrypoints.
 
 Real files `conf/{conf,cas}{,-test}.inc.php` and `conf/*.bkp.*` are gitignored. Only commit the `*.example.php` templates. Never commit real values (hosts, secrets, establishment data).
 
+The committed CI configuration is `ci/conf/conf.inc.php`. It must contain only synthetic application names, identifiers, domains, and URL paths. The GitHub Action copies it to `conf/conf.inc.php` before linting and tests.
+
 Before editing any private config file, create a backup next to it named with format `YYYYMMDDHHMMSS` (e.g. `conf.inc.php.bkp.20260821234356`). Existing backups follow this convention.
 
 Do not "fix" the spelling of the config variables `$AUTORIZED_IPS` / `$AUTORIZED_SUBNET`: they are read by `commonFunction.php` and defined in real private config files in both repos. Renaming requires coordinated changes outside this repository.

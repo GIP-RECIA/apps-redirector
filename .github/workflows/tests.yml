@@ -23,5 +23,11 @@ jobs:
           php -l index.php
           php -l resolution.php
 
+      - name: Install synthetic CI configuration
+        run: cp ci/conf/conf.inc.php conf/conf.inc.php
+
+      - name: Lint CI configuration
+        run: php -l conf/conf.inc.php
+
       - name: Run resolution unit tests
         run: php tests/resolution.php

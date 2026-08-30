@@ -28,7 +28,7 @@ function log_lvl_to_int($lvl)
 }
 
 include dirname(__DIR__) . '/resolution.php';
-include dirname(__DIR__) . '/tests/fixtures/conf.inc.php';
+include dirname(__DIR__) . '/ci/conf/conf.inc.php';
 
 $baseUrl = 'https://' . $_SERVER['SERVER_NAME'];
 $tests = 0;
