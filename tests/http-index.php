@@ -1,8 +1,8 @@
 <?php
 /**
- * HTTP integration test for the access-denied page served by index.php.
- * It verifies the 403 status and the portal chrome tags, but not external
- * JavaScript loading.
+ * HTTP integration tests for index.php served through the PHP built-in server.
+ * They verify a real 403 page and a real 302 redirect without relying on
+ * external portal JavaScript loading.
  */
 
 declare(strict_types=1);
@@ -23,6 +23,20 @@ function assertEquals($expected, $actual, string $label): void
     print "PASS: $label\n  resultat: " . var_export($actual, true) . "\n";
 }
 
+function free_port(): int
+{
+    $socket = stream_socket_server('tcp://127.0.0.1:0', $errno, $errstr);
+    if ($socket === false) {
+        throw new RuntimeException('Impossible de réserver un port libre: ' . $errstr);
+    }
+    $name = stream_socket_get_name($socket, false);
+    fclose($socket);
+    if (!preg_match('/:(\d+)$/', $name, $matches)) {
+        throw new RuntimeException('Port libre invalide: ' . $name);
+    }
+    return (int) $matches[1];
+}
+
 function wait_for_server(int $port, int $timeoutMs = 5000): void
 {
     $deadline = microtime(true) + ($timeoutMs / 1000);
@@ -37,13 +51,48 @@ function wait_for_server(int $port, int $timeoutMs = 5000): void
     throw new RuntimeException('Le serveur PHP intégré ne répond pas sur le port ' . $port . '.');
 }
 
-function run_http_request(int $port, string $path): array
+function start_server(array $env): array
+{
+    $port = free_port();
+    $serverEnv = array_merge($_ENV, $env);
+    $serverEnv['REDIRECTOR_CONFIG'] = 'ci/conf/conf.inc.php';
+    $serverEnv['CI_SERVER_NAME'] = 'redirector.test';
+    $serverEnv['CI_CAS_USER'] = 'ci-user';
+
+    $process = proc_open(
+        'php -S 127.0.0.1:' . $port . ' -t .',
+        array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')),
+        $pipes,
+        dirname(__DIR__),
+        $serverEnv
+    );
+
+    if (!is_resource($process)) {
+        throw new RuntimeException('Impossible de démarrer le serveur PHP intégré.');
+    }
+
+    wait_for_server($port);
+    return array($process, $pipes, $port);
+}
+
+function stop_server($process, array $pipes): void
+{
+    foreach ($pipes as $pipe) {
+        fclose($pipe);
+    }
+    proc_terminate($process);
+    proc_close($process);
+}
+
+function http_request(int $port, string $path): array
 {
     $context = stream_context_create(array(
         'http' => array(
             'method' => 'GET',
             'timeout' => 10,
             'ignore_errors' => true,
+            'follow_location' => 0,
+            'header' => "Host: redirector.test\r\nConnection: close\r\n",
         ),
     ));
     $body = file_get_contents('http://127.0.0.1:' . $port . $path, false, $context);
@@ -52,42 +101,54 @@ function run_http_request(int $port, string $path): array
     if (!preg_match('/^HTTP\/\d\.\d\s+(\d{3})\b/', $statusLine, $matches)) {
         throw new RuntimeException('Réponse HTTP invalide: ' . $statusLine);
     }
-    return array((int) $matches[1], $body === false ? '' : $body);
+    $headerMap = array();
+    foreach ($headers as $headerLine) {
+        if (strpos($headerLine, ':') === false) {
+            continue;
+        }
+        list($name, $value) = explode(':', $headerLine, 2);
+        $headerMap[strtolower(trim($name))] = trim($value);
+    }
+    return array((int) $matches[1], $headerMap, $body === false ? '' : $body);
 }
 
-$port = 18765;
-$env = array_merge($_ENV, array(
-    'REDIRECTOR_CONFIG' => 'ci/conf/conf.inc.php',
-    'CI_CAS_ATTRIBUTES' => '{}',
-));
-$process = proc_open(
-    'php -S 127.0.0.1:' . $port . ' -t .',
-    array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')),
-    $pipes,
-    dirname(__DIR__),
-    $env
+function assert_http_scenario(string $label, array $env, string $path, int $expectedStatus, ?string $expectedLocation = null, ?string $expectedBodyContains = null): void
+{
+    global $tests;
+    $server = start_server($env);
+    try {
+        list($process, $pipes, $port) = $server;
+        list($status, $headers, $body) = http_request($port, $path);
+
+        assertEquals($expectedStatus, $status, $label . ': code HTTP');
+        if (!is_null($expectedLocation)) {
+            assertEquals($expectedLocation, isset($headers['location']) ? $headers['location'] : null, $label . ': en-tête Location');
+        }
+        if (!is_null($expectedBodyContains)) {
+            assertEquals(true, strpos($body, $expectedBodyContains) !== false, $label . ': contenu présent');
+        }
+    } finally {
+        stop_server($server[0], $server[1]);
+    }
+}
+
+assert_http_scenario(
+    'Page d’accès refusé',
+    array('REDIRECTOR_DEV_MOD' => '0', 'CI_CAS_ATTRIBUTES' => '{}'),
+    '/index.php',
+    403,
+    null,
+    'Vous n\'avez pas acc&egrave;s &agrave; ce service !'
 );
 
-if (!is_resource($process)) {
-    throw new RuntimeException('Impossible de démarrer le serveur PHP intégré.');
-}
-
-try {
-    wait_for_server($port);
-    list($status, $body) = run_http_request($port, '/index.php');
-
-    assertEquals(403, $status, 'Code HTTP 403');
-    assertEquals(true, strpos($body, '<extended-uportal-header') !== false, 'Header uPortal présent');
-    assertEquals(true, strpos($body, '<extended-uportal-footer') !== false, 'Footer uPortal présent');
-    assertEquals(true, strpos($body, 'Accès refusé') !== false, 'Titre de page présent');
-    assertEquals(true, strpos($body, 'Vous n\'avez pas acc&egrave;s &agrave; ce service !') !== false, 'Message utilisateur présent');
-} finally {
-    foreach ($pipes as $pipe) {
-        fclose($pipe);
-    }
-    proc_terminate($process);
-    proc_close($process);
-}
+assert_http_scenario(
+    'Redirection réelle',
+    array('REDIRECTOR_DEV_MOD' => '0', 'CI_CAS_ATTRIBUTES' => json_encode(array('TestIdentifier' => '1234567A'))),
+    '/index.php?appli=TEST_ROUTING',
+    302,
+    'https://redirector.test/target-c',
+    null
+);
 
 if ($fails === 0) {
     print "Tests HTTP index: OK ($tests assertions)\n";

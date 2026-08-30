@@ -4,12 +4,18 @@
  * utilisée par les tests unitaires de résolution.
  */
 
-if (!isset($_SERVER['SERVER_NAME'])) {
+if (($ciServerName = getenv('CI_SERVER_NAME')) !== false && $ciServerName !== '') {
+    $_SERVER['SERVER_NAME'] = $ciServerName;
+} elseif (!isset($_SERVER['SERVER_NAME'])) {
     $_SERVER['SERVER_NAME'] = 'redirector.test';
 }
 
 $LOG_LVL = 'ERROR';
 $DEV_MOD = true;
+if (($ciDevMod = getenv('REDIRECTOR_DEV_MOD')) !== false) {
+    $ciDevMod = strtolower(trim($ciDevMod));
+    $DEV_MOD = in_array($ciDevMod, array('1', 'true', 'yes', 'on'), true);
+}
 $PATH_CAS_LIB = 'ci/fake-phpcas.php';
 $PATH_CAS_CONFIG = 'ci/conf/cas.inc.php';
 $LOG_FILENAME = sys_get_temp_dir() . '/esco-apps-redirector-ci.log';
