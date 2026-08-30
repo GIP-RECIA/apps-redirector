@@ -20,7 +20,14 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          extensions: curl, dom
           coverage: none
+
+      - name: Install phpCAS
+        run: composer install --working-dir=ci --no-interaction --prefer-dist
+
+      - name: Verify phpCAS installation
+        run: php -r "require 'ci/vendor/autoload.php'; exit(class_exists('phpCAS') ? 0 : 1);"
 
       - name: Lint source files
         run: |

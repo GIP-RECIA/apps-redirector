@@ -41,7 +41,9 @@ function check(bool $cond, string $label): void
     if (!$cond) {
         $fails++;
         fwrite(STDERR, "FAIL: $label\n");
+        return;
     }
+    print "PASS: $label\n";
 }
 
 function assertEquals($expected, $actual, string $label): void
@@ -51,7 +53,9 @@ function assertEquals($expected, $actual, string $label): void
     if ($expected !== $actual) {
         $fails++;
         fwrite(STDERR, "FAIL: $label\n  expected: " . var_export($expected, true) . "\n  actual:   " . var_export($actual, true) . "\n");
+        return;
     }
+    print "PASS: $label\n  resultat: " . var_export($actual, true) . "\n";
 }
 
 function assertThrows(string $label, callable $cb): void
@@ -63,6 +67,7 @@ function assertThrows(string $label, callable $cb): void
         $fails++;
         fwrite(STDERR, "FAIL: $label (aucune exception levée)\n");
     } catch (Throwable $e) {
+        print "PASS: $label => exception attendue\n";
     }
 }
 
@@ -70,6 +75,7 @@ function set_attrs(array $attrs): void
 {
     global $CAS_attrs;
     $CAS_attrs = $attrs;
+    print "Attributs CAS testés: " . json_encode($attrs, JSON_UNESCAPED_SLASHES) . "\n";
 }
 
 if (!isset($mapping['TEST_ROUTING'])) {
@@ -114,6 +120,7 @@ check(evaluate_filter_rule($routingFilter) === true, 'Filtre: identifiant non ex
 set_attrs(array('OTHER_ATTRIBUTE' => 'value'));
 check(evaluate_filter_rule($routingFilter) === false, 'Filtre: attribut absent');
 
+print "Domaine testé: " . $_SERVER['SERVER_NAME'] . "\n";
 assertEquals('https://service.test/default', find_domain_link($mapping['TEST_DOMAIN'], $_SERVER['SERVER_NAME']), 'DOMAIN_MAP: domaine courant');
 
 if ($fails === 0) {

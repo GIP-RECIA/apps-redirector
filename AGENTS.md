@@ -2,11 +2,15 @@
 
 ## Verification
 
-There is no test suite, no Composer, no lint config, and no CI. Verify changes with:
+Resolution tests and a GitHub Actions workflow are available. Verify changes with:
 
 ```bash
-php -l index.php && php -l commonFunction.php
+php -l index.php
+php -l resolution.php
+php tests/resolution.php
 ```
+
+The Composer manifest is isolated to `ci/composer.json`; it installs phpCAS only for CI verification and is not used by deployment.
 
 The app cannot run standalone: it needs the external phpCAS library (`$PATH_CAS_LIB` in `conf/conf.inc.php`, e.g. `/var/www/phpCAS/phpCAS-1.6.2/CAS.php`) plus real CAS/conf files that are not in this repo.
 

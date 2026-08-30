@@ -1,0 +1,11 @@
+{
+  "name": "example/esco-apps-redirector-ci",
+  "description": "Synthetic CI dependencies for ESCO Apps Redirector",
+  "license": "proprietary",
+  "require": {
+    "apereo/phpcas": "^1.6.2"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
