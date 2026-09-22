@@ -55,7 +55,7 @@ The private configuration repository is separate from this application repositor
 
 When `$DEV_MOD=true` and `check_authorized_access()` allows the request IP, the entrypoint enables PHP error display and `do_redirect()` shows the resolved 302 `Location` header instead of redirecting. The mode is inactive for other IPs.
 
-The access-denied page uses the uPortal webcomponents markup (`extended-uportal-header` and `extended-uportal-footer`). CI only verifies the generated HTML and HTTP status; it does not validate remote JavaScript loading from the portal domains.
+The access-denied page uses the uPortal webcomponents markup (`r-header` and `r-footer`). CI only verifies the generated HTML and HTTP status; it does not validate remote JavaScript loading from the portal domains.
 
 ## Mapping Modes
 
