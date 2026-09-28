@@ -65,9 +65,9 @@ function render_access_denied_page(string $message = "Vous n'avez pas acc&egrave
   echo '</head>';
   echo '<body>';
   echo '<nav role="navigation" aria-label="Accès rapide" class="skip-links"><ul><li><a href="#main">Contenu</a></li></ul></nav>';
-  echo '<header><r-header template-api-path="/commun/portal_template_api.tpl.json" fname="ESCO Apps Redirector" navigation-drawer-visible></r-header></header>';
+  echo '<header><r-header template-api-url="/commun/portal_template_api.tpl.json" fname="ESCO Apps Redirector" navigation-drawer-visible></r-header></header>';
   echo '<main id="main" tabindex="-1"><div class="container"><r-page-layout back-link="{&quot;name&quot;: &quot;Retour à l\'accueil&quot;,&quot;href&quot;: &quot;/portail&quot;,&quot;target&quot;: &quot;_self&quot;,&quot;rel&quot;: &quot;noopener noreferrer&quot;}" page-title="Accès refusé"><p>' . $message . '</p></r-page-layout></div></main>';
-  echo '<footer><r-footer template-api-path="/commun/portal_template_api.tpl.json"></r-footer></footer>';
+  echo '<footer><r-footer template-api-url="/commun/portal_template_api.tpl.json"></r-footer></footer>';
   echo '</body>';
   echo '</html>';
 }
